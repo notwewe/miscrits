@@ -1,6 +1,7 @@
 import pyautogui
 import time
 from playsound import playsound
+import tkinter as tk
 
 # Image paths for detecting the battle screen, Close button, and multiple Search areas
 BATTLE_SCREEN_IMAGE = 'battle.png'
@@ -109,8 +110,29 @@ def detect_ready_to_train():
         print("Error: Ready to train Miscrit not found.")
         return False
 
+def show_alert():
+    """Display an alert window with an 'Okay' button to stop the alarm."""
+    # Create a simple tkinter window
+    alert = tk.Tk()
+    alert.title("Target Miscrit Detected!")
+    alert.geometry("300x100")  # Set the window size
+
+    # Play the alarm sound once when the alert appears
+    playsound('alarm.mp3', block=False)
+
+    # Create a label for the message
+    label = tk.Label(alert, text="Target Miscrit detected! Click OK to stop the alarm.")
+    label.pack(pady=10)
+
+    # Create an "Okay" button to close the alert
+    button = tk.Button(alert, text="Okay", command=alert.destroy)
+    button.pack(pady=10)
+
+    # Run the alert window loop
+    alert.mainloop()
+
 def detect_target_miscrit():
-    """Check if the target Miscrit appears on screen."""
+    """Check if the target Miscrit appears on screen and show alert if found."""
     print("Checking for target Miscrit...")
 
     try:
@@ -118,9 +140,8 @@ def detect_target_miscrit():
         target_location = pyautogui.locateOnScreen(TARGET_MISCRIT_IMAGE, confidence=0.8)
 
         if target_location:
-            print("Target Miscrit detected! Alarm triggered.")
-            # Play the sound and show the alert at the same time
-            playsound('alarm.mp3')
+            print("Target Miscrit detected! Showing alert.")
+            show_alert()  # Show the alert pop-up with the alarm sound
             return True
         else:
             return False
