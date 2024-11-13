@@ -3,6 +3,8 @@ import time
 import pygame  # Using pygame for sound looping
 import tkinter as tk
 import keyboard
+from PIL import Image, ImageDraw
+import random
 
 # Initialize pygame for sound handling
 pygame.init()
@@ -24,6 +26,8 @@ TRAIN_NOW_BUTTON_COORDS = (938, 194)
 CONTINUE_BUTTON_COORDS = (1074, 900)
 CONTINUE_BUTTON_COORDS2 = (895, 663)
 CLOSE_TRAIN_BUTTON_COORDS = (1332, 158)
+
+SEARCH_REGION = (493 - 10, 278 - 10, (724 - 493) + 20, (335 - 278) + 20)
 
 running = False
 
@@ -188,31 +192,32 @@ def fight_miscrit():
 
     print("Returning to search for next encounter...")
 
-
 def detect_S():
-    """Detect if 'S' Miscrit is visible on the screen."""
-    print("Checking for 'S' Miscrit...")
+    """Detects 'S' Miscrit within the selected screen region."""
     try:
-        s_location = pyautogui.locateOnScreen('S.png', confidence=0.5)
-        if s_location:
-            print("'S' Miscrit detected!")
+        s_image_location = pyautogui.locateOnScreen('S.png', region=SEARCH_REGION, confidence=0.7)
+        if s_image_location:
+            print("S Miscrit found!")
             return True
-        return False
-    except pyautogui.ImageNotFoundException:
-        print("Error: 'S' Miscrit not found.")
+        else:
+            print("S Miscrit not found.")
+            return False
+    except Exception as e:
+        print(f"Error detecting S Miscrit: {e}")
         return False
 
 def detect_S_plus():
-    """Detect if 'S+' Miscrit is visible on the screen."""
-    print("Checking for 'S+' Miscrit...")
+    """Detects 'S+' Miscrit within the selected screen region."""
     try:
-        s_plus_location = pyautogui.locateOnScreen('Splus.png', confidence=0.8)
-        if s_plus_location:
-            print("'S+' Miscrit detected!")
+        s_plus_image_location = pyautogui.locateOnScreen('S+.png', region=SEARCH_REGION, confidence=0.7)
+        if s_plus_image_location:
+            print("S+ Miscrit found!")
             return True
-        return False
-    except pyautogui.ImageNotFoundException:
-        print("Error: 'S+' Miscrit not found.")
+        else:
+            print("S+ Miscrit not found.")
+            return False
+    except Exception as e:
+        print(f"Error detecting S+ Miscrit: {e}")
         return False
 
 def handle_training():
@@ -231,6 +236,8 @@ def handle_training():
         pyautogui.click((780, 901))  # Plat train button
         print("Plat train clicked for 'S' or 'S+' Miscrit.")
         time.sleep(1)
+        pyautogui.click(CONTINUE_BUTTON_COORDS)
+        time.sleep(1)
     else:
         pyautogui.click(CONTINUE_BUTTON_COORDS)
         time.sleep(1)
@@ -248,7 +255,6 @@ def handle_training():
     pyautogui.click(CLOSE_TRAIN_BUTTON_COORDS)
     time.sleep(1)
 
-
 def toggle_running_state():
     """Toggle the running state of the script based on Enter key press."""
     global running
@@ -257,6 +263,20 @@ def toggle_running_state():
         print("Script started. Press Enter again to stop.")
     else:
         print("Script stopped. Press Enter to start again.")
+def highlight_search_region():
+    """Highlight the search region in red to indicate the search area."""
+    screenshot = pyautogui.screenshot()  # This is already a PIL Image object
+    draw = ImageDraw.Draw(screenshot)
+    
+    # Draw a red rectangle around the search region
+    x, y, width, height = SEARCH_REGION
+    draw.rectangle([x, y, x + width, y + height], outline="red", width=3)
+    
+    # Display the highlighted search region (optional)
+    screenshot.show()  # Shows the image for debugging purposes
+
+    # If you want to save the highlighted image for later reference
+    screenshot.save('highlighted_search_region.png')
 
 def main_loop():
     """Main loop that runs while the script is in the running state."""
@@ -270,6 +290,9 @@ def main_loop():
             start_time = time.time()  # Start time for the search
 
             while time.time() - start_time < search_timeout:  # Limit search time
+
+                #highlight_search_region()
+
                 if search_for_miscrit():
                     print("Miscrit found! Entering battle...")
                     fight_miscrit()  # Proceed with battle if found
