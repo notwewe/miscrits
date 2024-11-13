@@ -8,12 +8,12 @@ import keyboard
 pygame.init()
 
 # Image paths for detecting the battle screen, Close button, and multiple Search areas
-BATTLE_SCREEN_IMAGES = ['battleS.png', 'battle10.png', 'battle.png', 'fight.png', 'battle (3).png']  # List of battle screen images
 CLOSE_BUTTON_IMAGE = 'close.png'
-SEARCH_AREAS = ['zapzap.png', 'lzap2.png', 'lzap.png', 'lzap2.png']
+SEARCH_AREAS = ['zapzap.png', 'lzap2.png', 'lzap.png', 'lzap2.png', 'backs.png', 'raw.png']
 WIN_SCREEN_IMAGE = 'win (2).png'
 READY_TO_TRAIN_IMAGE = 'readytotrain.png'
 TARGET_MISCRIT_IMAGE = 'lightzap2.png'
+MISCRIT_IMAGE = 'battle10.png'  # Path to the image of the Miscrit you're looking for
 
 # Fixed coordinates for buttons (replace with actual coordinates)
 ATTACK_BUTTON_COORDS = (643, 947)
@@ -38,34 +38,23 @@ def search_for_miscrit():
                 print(f"Search area found: {search_area}. Clicking to search for Miscrit...")
                 search_area_center = pyautogui.center(search_area_location)
                 pyautogui.click(search_area_center)
-                time.sleep(2)
-                pyautogui.screenshot(f'search_for_miscrit_{search_area}.png')
-                return True
+                time.sleep(2)  # Wait to ensure the search starts
+                pyautogui.screenshot(f'search_for_miscrit_{search_area}.png')  # Capture a screenshot for debugging
+
+                # Now check if the Miscrit is found
+                if is_miscrit_found():
+                    print("Miscrit found! Entering battle...")
+                    return True  # Proceed to battle if Miscrit is found
+                else:
+                    print("Miscrit not found in the search area. Trying next area...")
             else:
                 print(f"Search area not found: {search_area}")
         except pyautogui.ImageNotFoundException:
             print(f"Error: {search_area} not found on screen.")
-            pyautogui.screenshot('search_error.png')
-    return False
+            pyautogui.screenshot('search_error.png')  # Capture an error screenshot for debugging
+            continue  # Skip the missing area and move to the next one
 
-def is_battle_found():
-    """Step 2: Checks if any of the battle screen images are detected."""
-    print("Checking for battle screen...")
-    try:
-        region = (0, 0, 1920, 1080)
-        for battle_image in BATTLE_SCREEN_IMAGES:
-            print(f"Trying to locate battle screen image: {battle_image}")
-            battle_screen_location = pyautogui.locateOnScreen(battle_image, confidence=0.8, region=region)
-            if battle_screen_location:
-                print(f"Battle screen detected using image: {battle_image}")
-                return True
-        # Only print this after trying all images
-        print("Battle screen not found.")
-        return False
-    except pyautogui.ImageNotFoundException:
-        print("Error: Battle screen not found.")
-        pyautogui.screenshot('battle_screen_check_error.png')
-        return False
+    return False  # If no Miscrit was found in any search area, return False
 
 def locate_win_screen():
     """Locate the win screen after the battle."""
@@ -145,29 +134,86 @@ def detect_evolved_text():
         print("Error: 'Evolved' text not found.")
         return False
 
+MAX_BATTLE_TIME = 180  # Maximum battle time in seconds (3 minutes)
+
+def is_miscrit_found():
+    """Check if the Miscrit image is on the screen."""
+    pyautogui.screenshot('debug_before_fight.png')  # Capture a screenshot right before checking for the Miscrit
+    miscrit_location = pyautogui.locateOnScreen(MISCRIT_IMAGE, confidence=0.7)
+    return miscrit_location is not None
+
 def fight_miscrit():
     """Step 3: Engages in the fight by clicking the Attack button until the battle ends."""
     print("Entering battle loop...")
-    while is_battle_found():
-        print("Battle detected! Attacking Miscrit...")
-        while not locate_win_screen():
-            if detect_target_miscrit():
-                print("Pausing attack due to target Miscrit.")
-                time.sleep(5)
-                continue
-            print("Clicking Attack button...")
-            pyautogui.click(ATTACK_BUTTON_COORDS)
-            print(f"Clicked on Attack button at {ATTACK_BUTTON_COORDS}")
-            time.sleep(1)
-        print("Win screen detected!")
-        time.sleep(2)
-        pyautogui.click(CLOSE_BUTTON_COORDS)
-        if detect_ready_to_train():
-            pyautogui.click(CLOSE_BUTTON_COORDS)
-            handle_training()
+    battle_ended = False  # Flag to track if the battle has ended
+    start_time = time.time()  # Start time of the battle
 
-        print("Returning to search for next encounter...")
-        break
+    # Verify Miscrit presence before starting the battle loop
+    if not is_miscrit_found():
+        print("Error: Miscrit not found, skipping battle.")
+        return  # Exit function if Miscrit is not found
+
+    while not battle_ended:  # Continue loop until battle ends
+        # If target Miscrit is detected, pause the attack
+        if detect_target_miscrit():
+            print("Target Miscrit detected! Pausing attack.")
+            # Allow manual interaction after detecting the target Miscrit
+            time.sleep(5)  # You can adjust the sleep time to suit your needs
+            continue  # Continue to the next attack phase
+
+        print("Clicking Attack button...")
+        pyautogui.click(ATTACK_BUTTON_COORDS)
+        print(f"Clicked on Attack button at {ATTACK_BUTTON_COORDS}")
+        time.sleep(1)  # Adjust time interval between attacks
+
+        # Check for win screen after attacking
+        if locate_win_screen():
+            print("Win screen detected!")
+            time.sleep(3)
+            if detect_ready_to_train():  # Check if 'Ready to Train' screen is visible
+                pyautogui.click(CLOSE_BUTTON_COORDS)  # Close win screen
+                print("Ready to Train detected. Proceeding to training...")
+                handle_training()  # Proceed to training
+            else:
+                print("No Ready to Train detected. Closing win screen.")
+                pyautogui.click(CLOSE_BUTTON_COORDS)  # Close win screen
+            battle_ended = True  # Mark the battle as ended
+            break  # Exit battle loop
+
+        # Optional: Check for other failure conditions like timeout
+        if time.time() - start_time > MAX_BATTLE_TIME:  # Add max battle time if necessary
+            print("Max battle time reached, ending battle.")
+            battle_ended = True
+            break
+
+    print("Returning to search for next encounter...")
+
+
+def detect_S():
+    """Detect if 'S' Miscrit is visible on the screen."""
+    print("Checking for 'S' Miscrit...")
+    try:
+        s_location = pyautogui.locateOnScreen('S.png', confidence=0.5)
+        if s_location:
+            print("'S' Miscrit detected!")
+            return True
+        return False
+    except pyautogui.ImageNotFoundException:
+        print("Error: 'S' Miscrit not found.")
+        return False
+
+def detect_S_plus():
+    """Detect if 'S+' Miscrit is visible on the screen."""
+    print("Checking for 'S+' Miscrit...")
+    try:
+        s_plus_location = pyautogui.locateOnScreen('Splus.png', confidence=0.8)
+        if s_plus_location:
+            print("'S+' Miscrit detected!")
+            return True
+        return False
+    except pyautogui.ImageNotFoundException:
+        print("Error: 'S+' Miscrit not found.")
+        return False
 
 def handle_training():
     """Handles the training sequence for the Miscrit."""
@@ -179,22 +225,29 @@ def handle_training():
     time.sleep(1)
     pyautogui.click(TRAIN_NOW_BUTTON_COORDS)
     time.sleep(1)
-    pyautogui.click(CONTINUE_BUTTON_COORDS2)
-    time.sleep(1)
-    pyautogui.click(CONTINUE_BUTTON_COORDS)
-    time.sleep(1)
-    pyautogui.click(CONTINUE_BUTTON_COORDS2)
-    time.sleep(1)
-    if detect_evolved_text():
-        pyautogui.click((898, 824))
+
+    # Check if 'S' or 'S+' Miscrit is detected, then click plat train
+    if detect_S() or detect_S_plus():
+        pyautogui.click((780, 901))  # Plat train button
+        print("Plat train clicked for 'S' or 'S+' Miscrit.")
         time.sleep(1)
-        pyautogui.click((898, 764))
+    else:
+        pyautogui.click(CONTINUE_BUTTON_COORDS)
+        time.sleep(1)
+        pyautogui.click(CONTINUE_BUTTON_COORDS2)
+        time.sleep(1)
+
+        # Check for evolved text to perform additional actions
+        if detect_evolved_text():
+            pyautogui.click((898, 824))
+            time.sleep(1)
+            pyautogui.click((898, 764))
+            time.sleep(1)
+
+    # Close the training window
     pyautogui.click(CLOSE_TRAIN_BUTTON_COORDS)
     time.sleep(1)
 
-    # Click the Close Train button
-    pyautogui.click(CLOSE_TRAIN_BUTTON_COORDS)
-    time.sleep(1)
 
 def toggle_running_state():
     """Toggle the running state of the script based on Enter key press."""
@@ -208,25 +261,28 @@ def toggle_running_state():
 def main_loop():
     """Main loop that runs while the script is in the running state."""
     global running
+    search_timeout = 30  # Max time (seconds) to search for Miscrits before retrying
     while True:
-        # Check if the script should stop running
         if not running:
             continue
 
         try:
-            if search_for_miscrit():
-                print("Miscrit found! Entering battle...")
-                fight_miscrit()
-            
-            if is_battle_found():
-                print("Battle detected! Fighting...")
-                fight_miscrit()
+            start_time = time.time()  # Start time for the search
+
+            while time.time() - start_time < search_timeout:  # Limit search time
+                if search_for_miscrit():
+                    print("Miscrit found! Entering battle...")
+                    fight_miscrit()  # Proceed with battle if found
+                    break
+                else:
+                    print("No Miscrit found, retrying search...")
+                    time.sleep(1)
 
             else:
-                print("No available search areas or no battle detected. Waiting...")
-                time.sleep(1)
+                print(f"Timeout reached while searching for Miscrit. Retrying...")
             print("Returning to search for next encounter...")
             time.sleep(1)
+
         except KeyboardInterrupt:
             print("Script stopped by user.")
             break
