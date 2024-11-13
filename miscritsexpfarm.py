@@ -5,6 +5,9 @@ import tkinter as tk
 import keyboard
 from PIL import Image, ImageDraw
 import random
+import pytesseract
+
+pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
 
 # Initialize pygame for sound handling
 pygame.init()
@@ -111,19 +114,45 @@ def show_alert():
     button.pack(pady=10)
     alert.mainloop()
 
-def detect_target_miscrit():
-    """Check if the target Miscrit appears on screen and show alert if found."""
-    print("Checking for target Miscrit...")
-    try:
-        target_location = pyautogui.locateOnScreen(TARGET_MISCRIT_IMAGE, confidence=0.8)
-        if target_location:
-            print("Target Miscrit detected! Showing alert.")
-            show_alert()
-            return True
-        return False
-    except pyautogui.ImageNotFoundException:
-        print("Error: Target Miscrit not found.")
-        return False
+from PIL import ImageOps
+import concurrent.futures
+
+def preprocess_image_for_ocr(image):
+    """Preprocess the image for OCR to enhance text detection."""
+    grayscale_image = image.convert('L')  # Convert image to grayscale
+    enhanced_image = ImageOps.autocontrast(grayscale_image)  # Enhance contrast
+    return enhanced_image
+
+def detect_target_miscrit(target_texts=["Light Zaptor"]):
+    """Detect if any of the target Miscrit texts appear on screen and show alert if found."""
+    print("Checking for target Miscrit texts...")
+
+    def ocr_task():
+        try:
+
+            search_region = (1219, 71, 109, 26)  # Width = 1328 - 1219, Height = 97 - 71
+
+            screenshot = pyautogui.screenshot(region=search_region)  # Capture region
+            screenshot = preprocess_image_for_ocr(screenshot)  # Preprocess image
+            text_in_region = pytesseract.image_to_string(screenshot)  # OCR text detection
+            return text_in_region
+        except Exception as e:
+            print(f"Error in OCR: {e}")
+            return ""
+
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        future = executor.submit(ocr_task)  # Run OCR in a separate thread
+        text_in_region = future.result()  # Get OCR result
+
+    # Check if any of the target texts with first letter capitalized are in the detected text
+    for target_text in target_texts:
+        if target_text in text_in_region:
+            print(f"Target Miscrit '{target_text}' detected! Showing alert.")
+            show_alert()  # Trigger alert if Miscrit detected
+            return True  # Return True when any of the target Miscrits are found
+
+    print("None of the target Miscrit texts were found.")
+    return False
 
 def detect_evolved_text():
     """Detect if the 'evolved' text is visible on the screen."""
@@ -264,12 +293,14 @@ def toggle_running_state():
     else:
         print("Script stopped. Press Enter to start again.")
 def highlight_search_region():
+
+    search_region = (1219, 71, 109, 26)  # Width = 1328 - 1219, Height = 97 - 71
     """Highlight the search region in red to indicate the search area."""
     screenshot = pyautogui.screenshot()  # This is already a PIL Image object
     draw = ImageDraw.Draw(screenshot)
     
     # Draw a red rectangle around the search region
-    x, y, width, height = SEARCH_REGION
+    x, y, width, height = search_region
     draw.rectangle([x, y, x + width, y + height], outline="red", width=3)
     
     # Display the highlighted search region (optional)

@@ -1,32 +1,37 @@
-from PIL import Image, ImageDraw
+import pyautogui
+import keyboard
 
-def draw_red_box_on_region(image_path, region):
-    """Draw a red box around the defined region on the given image."""
-    try:
-        # Open the image
-        image = Image.open(image_path)
-        
-        # Define the region (x1, y1, width, height)
-        x1, y1, width, height = region
-        x2, y2 = x1 + width, y1 + height
-        
-        # Initialize ImageDraw
-        draw = ImageDraw.Draw(image)
-        
-        # Draw a red rectangle around the region
-        draw.rectangle([x1, y1, x2, y2], outline="red", width=3)
-        
-        # Save the modified image with the red box
-        image.save("image_with_red_box.png")
-        image.show()  # Optionally display the image
-    except Exception as e:
-        print(f"Error: {e}")
+# Initialize coordinates variables
+top_left = None
+bottom_right = None
 
-# Define the SEARCH_REGION (x1, y1, width, height)
-SEARCH_REGION = (493, 278, 724 - 493, 335 - 278)
+# Function to get coordinates
+def get_coordinates():
+    global top_left, bottom_right
+    
+    print("Press 'Enter' to start capturing coordinates...")
+    keyboard.wait('enter')  # Wait until Enter key is pressed
 
-# Specify the image path you want to draw the box on
-image_path = "sss.png"  # Replace with your actual image path
+    print("Press 'p' to capture the top-left corner of the region.")
+    while top_left is None:
+        if keyboard.is_pressed('p'):  # Wait for 'p' to be pressed
+            top_left = pyautogui.position()  # Get current mouse position
+            print(f"Top-left corner captured at {top_left}")
+            while keyboard.is_pressed('p'):  # Wait for the key to be released to prevent multiple captures
+                pass
 
-# Call the function to draw the red box
-draw_red_box_on_region(image_path, SEARCH_REGION)
+    print("Press 'p' again to capture the bottom-right corner of the region.")
+    while bottom_right is None:
+        if keyboard.is_pressed('p'):  # Wait for 'p' to be pressed
+            bottom_right = pyautogui.position()  # Get current mouse position
+            print(f"Bottom-right corner captured at {bottom_right}")
+            while keyboard.is_pressed('p'):  # Wait for the key to be released
+                pass
+
+    print(f"Region selected from {top_left} to {bottom_right}")
+    return top_left, bottom_right
+
+# Start capturing coordinates
+top_left, bottom_right = get_coordinates()
+
+# Optionally, you can do something with the coordinates, such as define a region for screenshotting.
