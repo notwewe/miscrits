@@ -1,0 +1,2 @@
+Search Areas: ['C:/Users/Francis Wedemeyer/Pictures/Screenshots/foil.png', 'C:/Users/Francis Wedemeyer/Pictures/Screenshots/Screenshot 2024-11-14 183807.png']
+Target Miscrits: []

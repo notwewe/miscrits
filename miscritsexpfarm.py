@@ -14,10 +14,10 @@ pygame.init()
 
 # Image paths for detecting the battle screen, Close button, and multiple Search areas
 CLOSE_BUTTON_IMAGE = 'close.png'
-SEARCH_AREAS = ['foil.png']
+SEARCH_AREAS = ['lightA.png']
 WIN_SCREEN_IMAGE = 'win (2).png'
 READY_TO_TRAIN_IMAGE = 'readytotrain.png'
-TARGET_MISCRIT_IMAGE = 'lightzap2.png'
+#TARGET_MISCRIT_IMAGE = 'lightzap2.png'
 MISCRIT_IMAGE = 'battle10.png'  # Path to the image of the Miscrit you're looking for
 
 # Fixed coordinates for buttons (replace with actual coordinates)
@@ -124,7 +124,7 @@ def preprocess_image_for_ocr(image):
     enhanced_image = ImageOps.autocontrast(grayscale_image)  # Enhance contrast
     return enhanced_image
 
-def detect_target_miscrit(target_texts=["Foil Vhisp"]):
+def detect_target_miscrit(target_texts=["Light Frostmite"]):
     """Detect if any of the target Miscrit texts appear on screen and show alert if found."""
     print("Checking for target Miscrit texts...")
 
@@ -198,12 +198,11 @@ def fight_miscrit():
         print("Clicking Attack button...")
         pyautogui.click(ATTACK_BUTTON_COORDS)
         print(f"Clicked on Attack button at {ATTACK_BUTTON_COORDS}")
-        time.sleep(1)  # Adjust time interval between attacks
 
         # Check for win screen after attacking
         if locate_win_screen():
             print("Win screen detected!")
-            time.sleep(3)
+            time.sleep(2)
             if detect_ready_to_train():  # Check if 'Ready to Train' screen is visible
                 pyautogui.click(CLOSE_BUTTON_COORDS)  # Close win screen
                 print("Ready to Train detected. Proceeding to training...")
