@@ -38,6 +38,7 @@ def search_for_miscrit():
     """Step 1: Clicks on one of the available locations to search for Miscrits."""
     print("Searching for a Miscrit...")
     pyautogui.click((1353, 500))
+    pyautogui.click((1353, 500))
     for search_area in SEARCH_AREAS:
         print(f"Attempting to locate search area: {search_area}")
         try:
