@@ -14,7 +14,7 @@ pygame.init()
 
 # Image paths for detecting the battle screen, Close button, and multiple Search areas
 CLOSE_BUTTON_IMAGE = 'close.png'
-SEARCH_AREAS = ['zapzap.png', 'lzap2.png', 'lzap.png', 'lzap2.png', 'backs.png', 'raw.png']
+SEARCH_AREAS = ['foil.png']
 WIN_SCREEN_IMAGE = 'win (2).png'
 READY_TO_TRAIN_IMAGE = 'readytotrain.png'
 TARGET_MISCRIT_IMAGE = 'lightzap2.png'
@@ -37,6 +37,7 @@ running = False
 def search_for_miscrit():
     """Step 1: Clicks on one of the available locations to search for Miscrits."""
     print("Searching for a Miscrit...")
+    pyautogui.click((1353, 500))
     for search_area in SEARCH_AREAS:
         print(f"Attempting to locate search area: {search_area}")
         try:
@@ -123,7 +124,7 @@ def preprocess_image_for_ocr(image):
     enhanced_image = ImageOps.autocontrast(grayscale_image)  # Enhance contrast
     return enhanced_image
 
-def detect_target_miscrit(target_texts=["Light Zaptor"]):
+def detect_target_miscrit(target_texts=["Foil Vhisp"]):
     """Detect if any of the target Miscrit texts appear on screen and show alert if found."""
     print("Checking for target Miscrit texts...")
 
