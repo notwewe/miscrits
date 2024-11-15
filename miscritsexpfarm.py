@@ -19,6 +19,7 @@ WIN_SCREEN_IMAGE = 'win (2).png'
 READY_TO_TRAIN_IMAGE = 'readytotrain.png'
 #TARGET_MISCRIT_IMAGE = 'lightzap2.png'
 MISCRIT_IMAGE = 'battle10.png'  # Path to the image of the Miscrit you're looking for
+search_drops = ["gold.png", "potion.png"]
 
 # Fixed coordinates for buttons (replace with actual coordinates)
 ATTACK_BUTTON_COORDS = (643, 947)
@@ -34,10 +35,28 @@ SEARCH_REGION = (491, 316, 514 - 491, 338 - 316)
 
 running = False
 
+SEARCH_DROP_REGION = (600, 461, 264, 194)
+
+def check_and_click_search_drop():
+    """Check if any search drop is visible in the defined region and click it."""
+    print("Checking for search drops in the main region...")
+    for drop_image in search_drops:
+        try:
+            drop_location = pyautogui.locateOnScreen(drop_image, confidence=0.8)
+            if drop_location:
+                print(f"Search drop found: {drop_image}. Clicking...")
+                pyautogui.click(pyautogui.center(drop_location))
+                time.sleep(2)  # Wait for actions triggered by the click
+                return True  # If a search drop is found and clicked, return True
+        except pyautogui.ImageNotFoundException:
+            print(f"Error: {drop_image} not found on screen.")
+    print("No search drops found in the main region.")
+    return False  # Return False if no drops are detected
+
 def clear_area_for_visibility():
     print("Clearing the area for visibility...")
     # Click to clear the area (adjust coordinates as necessary)
-    pyautogui.click(960, 700)  
+    pyautogui.click(1040, 540)  
     time.sleep(3)  # Wait for area to be cleared
 
 def search_for_miscrit():
@@ -313,7 +332,7 @@ def toggle_running_state():
 def highlight_search_region():
 
     #search_region = (1219, 71, 109, 26)  # Width = 1328 - 1219, Height = 97 - 71
-    search_region = SEARCH_REGION
+    search_region = SEARCH_DROP_REGION
     """Highlight the search region in red to indicate the search area."""
     screenshot = pyautogui.screenshot()  # This is already a PIL Image object
     draw = ImageDraw.Draw(screenshot)
@@ -340,6 +359,9 @@ def main_loop():
             start_time = time.time()  # Start time for the search
 
             while time.time() - start_time < search_timeout:  # Limit search time
+                if check_and_click_search_drop():
+                    print("Search drop clicked. Continuing...")
+                    continue  # Proceed to the next step after handling a drop
 
                 #highlight_search_region()
                 clear_area_for_visibility()
