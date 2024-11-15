@@ -14,7 +14,7 @@ pygame.init()
 
 # Image paths for detecting the battle screen, Close button, and multiple Search areas
 CLOSE_BUTTON_IMAGE = 'close.png'
-SEARCH_AREAS = ['lightA.png']
+SEARCH_AREAS = ['wow.png']
 WIN_SCREEN_IMAGE = 'win (2).png'
 READY_TO_TRAIN_IMAGE = 'readytotrain.png'
 #TARGET_MISCRIT_IMAGE = 'lightzap2.png'
@@ -30,15 +30,19 @@ CONTINUE_BUTTON_COORDS = (1074, 900)
 CONTINUE_BUTTON_COORDS2 = (895, 663)
 CLOSE_TRAIN_BUTTON_COORDS = (1332, 158)
 
-SEARCH_REGION = (493 - 10, 278 - 10, (724 - 493) + 20, (335 - 278) + 20)
+SEARCH_REGION = (491, 316, 514 - 491, 338 - 316)
 
 running = False
 
+def clear_area_for_visibility():
+    print("Clearing the area for visibility...")
+    # Click to clear the area (adjust coordinates as necessary)
+    pyautogui.click(960, 700)  
+    time.sleep(3)  # Wait for area to be cleared
+
 def search_for_miscrit():
-    """Step 1: Clicks on one of the available locations to search for Miscrits."""
+    """Step 1: Clicks to clear the area and then searches for Miscrits."""
     print("Searching for a Miscrit...")
-    pyautogui.click((1353, 500))
-    pyautogui.click((1353, 500))
     for search_area in SEARCH_AREAS:
         print(f"Attempting to locate search area: {search_area}")
         try:
@@ -47,15 +51,16 @@ def search_for_miscrit():
                 print(f"Search area found: {search_area}. Clicking to search for Miscrit...")
                 search_area_center = pyautogui.center(search_area_location)
                 pyautogui.click(search_area_center)
-                time.sleep(2)  # Wait to ensure the search starts
-                pyautogui.screenshot(f'search_for_miscrit_{search_area}.png')  # Capture a screenshot for debugging
+                time.sleep(4)  # Wait to ensure the search starts
 
                 # Now check if the Miscrit is found
                 if is_miscrit_found():
                     print("Miscrit found! Entering battle...")
+                    area_cleared = False  # Reset area cleared flag for the next cycle
                     return True  # Proceed to battle if Miscrit is found
                 else:
                     print("Miscrit not found in the search area. Trying next area...")
+
             else:
                 print(f"Search area not found: {search_area}")
         except pyautogui.ImageNotFoundException:
@@ -125,7 +130,7 @@ def preprocess_image_for_ocr(image):
     enhanced_image = ImageOps.autocontrast(grayscale_image)  # Enhance contrast
     return enhanced_image
 
-def detect_target_miscrit(target_texts=["Light Frostmite"]):
+def detect_target_miscrit(target_texts=["Freedom"]):
     """Detect if any of the target Miscrit texts appear on screen and show alert if found."""
     print("Checking for target Miscrit texts...")
 
@@ -160,7 +165,7 @@ def detect_evolved_text():
     """Detect if the 'evolved' text is visible on the screen."""
     print("Checking for 'evolved' text...")
     try:
-        evolved_location = pyautogui.locateOnScreen('evolved.png', confidence=0.8)
+        evolved_location = pyautogui.locateOnScreen('evolved.png', confidence=0.7)
         if evolved_location:
             print("'Evolved' text detected!")
             return True
@@ -203,7 +208,7 @@ def fight_miscrit():
         # Check for win screen after attacking
         if locate_win_screen():
             print("Win screen detected!")
-            time.sleep(2)
+            time.sleep(2.5)
             if detect_ready_to_train():  # Check if 'Ready to Train' screen is visible
                 pyautogui.click(CLOSE_BUTTON_COORDS)  # Close win screen
                 print("Ready to Train detected. Proceeding to training...")
@@ -241,7 +246,6 @@ def detect_S_plus():
     try:
         s_plus_image_location = pyautogui.locateOnScreen('S+.png', region=SEARCH_REGION, confidence=0.7)
         if s_plus_image_location:
-            print("S+ Miscrit found!")
             return True
         else:
             print("S+ Miscrit not found.")
@@ -261,25 +265,38 @@ def handle_training():
     pyautogui.click(TRAIN_NOW_BUTTON_COORDS)
     time.sleep(1)
 
-    # Check if 'S' or 'S+' Miscrit is detected, then click plat train
     if detect_S() or detect_S_plus():
         pyautogui.click((780, 901))  # Plat train button
         print("Plat train clicked for 'S' or 'S+' Miscrit.")
         time.sleep(1)
         pyautogui.click(CONTINUE_BUTTON_COORDS)
         time.sleep(1)
+        pyautogui.click(CONTINUE_BUTTON_COORDS2)
+        time.sleep(1)
+
+        # Wait for animation to complete before checking for evolved text
+        time.sleep(1)  # Add a 1-second delay before evolved detection
+
+        # Check for evolved text after plat training
+        evolved_detected = False
+        for _ in range(2):  # Increased retries to 2 (you can adjust this value)
+            if detect_evolved_text():
+                evolved_detected = True
+                print("Evolved text detected! Clicking to proceed.")
+                pyautogui.click((898, 824))  # Adjust coordinates as necessary
+                time.sleep(1)
+                pyautogui.click((898, 764))  # Adjust coordinates as necessary
+                time.sleep(1)
+                break  # Exit loop if evolved text is detected
+
+        if not evolved_detected:
+            print("Evolved text not detected after retries. Proceeding without evolution action.")
     else:
+        # Skip plat train actions if it's not an 'S' or 'S+' Miscrit
         pyautogui.click(CONTINUE_BUTTON_COORDS)
         time.sleep(1)
         pyautogui.click(CONTINUE_BUTTON_COORDS2)
         time.sleep(1)
-
-        # Check for evolved text to perform additional actions
-        if detect_evolved_text():
-            pyautogui.click((898, 824))
-            time.sleep(1)
-            pyautogui.click((898, 764))
-            time.sleep(1)
 
     # Close the training window
     pyautogui.click(CLOSE_TRAIN_BUTTON_COORDS)
@@ -295,7 +312,8 @@ def toggle_running_state():
         print("Script stopped. Press Enter to start again.")
 def highlight_search_region():
 
-    search_region = (1219, 71, 109, 26)  # Width = 1328 - 1219, Height = 97 - 71
+    #search_region = (1219, 71, 109, 26)  # Width = 1328 - 1219, Height = 97 - 71
+    search_region = SEARCH_REGION
     """Highlight the search region in red to indicate the search area."""
     screenshot = pyautogui.screenshot()  # This is already a PIL Image object
     draw = ImageDraw.Draw(screenshot)
@@ -324,6 +342,7 @@ def main_loop():
             while time.time() - start_time < search_timeout:  # Limit search time
 
                 #highlight_search_region()
+                clear_area_for_visibility()
 
                 if search_for_miscrit():
                     print("Miscrit found! Entering battle...")
@@ -331,12 +350,12 @@ def main_loop():
                     break
                 else:
                     print("No Miscrit found, retrying search...")
-                    time.sleep(1)
+                    #time.sleep(1)
 
             else:
                 print(f"Timeout reached while searching for Miscrit. Retrying...")
             print("Returning to search for next encounter...")
-            time.sleep(1)
+            #time.sleep(1)
 
         except KeyboardInterrupt:
             print("Script stopped by user.")
