@@ -297,19 +297,23 @@ def handle_training():
         time.sleep(1)
 
         # Wait for animation to complete before checking for evolved text
-        time.sleep(1)  # Add a 1-second delay before evolved detection
+        print("Waiting for evolution animation to complete...")
+        time.sleep(2)  # Increased delay to 2 seconds for evolution animation
 
         # Check for evolved text after plat training
         evolved_detected = False
-        for _ in range(2):  # Increased retries to 2 (you can adjust this value)
+        for attempt in range(3):  # Increased retries to 3
             if detect_evolved_text():
                 evolved_detected = True
-                print("Evolved text detected! Clicking to proceed.")
-                pyautogui.click((898, 824))  # Adjust coordinates as necessary
+                print("Evolved text detected on attempt", attempt + 1)
+                pyautogui.click((898, 824))  # Click evolved Miscrit
                 time.sleep(1)
-                pyautogui.click((898, 764))  # Adjust coordinates as necessary
+                pyautogui.click((898, 764))  # Confirm evolution
                 time.sleep(1)
-                break  # Exit loop if evolved text is detected
+                break
+            else:
+                print(f"Attempt {attempt + 1}: Evolved text not detected. Retrying...")
+                time.sleep(1)  # Delay before retrying
 
         if not evolved_detected:
             print("Evolved text not detected after retries. Proceeding without evolution action.")
@@ -321,6 +325,7 @@ def handle_training():
         time.sleep(1)
 
     # Close the training window
+    print("Closing the training window...")
     pyautogui.click(CLOSE_TRAIN_BUTTON_COORDS)
     time.sleep(1)
 
