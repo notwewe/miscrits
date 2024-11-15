@@ -6,6 +6,7 @@ import keyboard
 from PIL import Image, ImageDraw
 import random
 import pytesseract
+import datetime
 
 pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
 
@@ -14,12 +15,12 @@ pygame.init()
 
 # Image paths for detecting the battle screen, Close button, and multiple Search areas
 CLOSE_BUTTON_IMAGE = 'close.png'
-SEARCH_AREAS = ['wow.png']
+SEARCH_AREAS = ['foilw.png']
 WIN_SCREEN_IMAGE = 'win (2).png'
 READY_TO_TRAIN_IMAGE = 'readytotrain.png'
 #TARGET_MISCRIT_IMAGE = 'lightzap2.png'
 MISCRIT_IMAGE = 'battle10.png'  # Path to the image of the Miscrit you're looking for
-search_drops = ["gold.png", "potion.png"]
+search_drops = ["gold.png", "potion.png", "potion2.png"]
 
 # Fixed coordinates for buttons (replace with actual coordinates)
 ATTACK_BUTTON_COORDS = (643, 947)
@@ -35,14 +36,15 @@ SEARCH_REGION = (491, 316, 514 - 491, 338 - 316)
 
 running = False
 
-SEARCH_DROP_REGION = (600, 461, 264, 194)
+SEARCH_DROP_REGION = (795, 350, 272, 211)  
 
 def check_and_click_search_drop():
     """Check if any search drop is visible in the defined region and click it."""
     print("Checking for search drops in the main region...")
+    time.sleep(2)
     for drop_image in search_drops:
         try:
-            drop_location = pyautogui.locateOnScreen(drop_image, confidence=0.8)
+            drop_location = pyautogui.locateOnScreen(drop_image, region=SEARCH_DROP_REGION, confidence=0.7)
             if drop_location:
                 print(f"Search drop found: {drop_image}. Clicking...")
                 pyautogui.click(pyautogui.center(drop_location))
@@ -52,12 +54,11 @@ def check_and_click_search_drop():
             print(f"Error: {drop_image} not found on screen.")
     print("No search drops found in the main region.")
     return False  # Return False if no drops are detected
-
 def clear_area_for_visibility():
     print("Clearing the area for visibility...")
     # Click to clear the area (adjust coordinates as necessary)
     pyautogui.click(1040, 540)  
-    time.sleep(3)  # Wait for area to be cleared
+    time.sleep(1.5)  # Wait for area to be cleared
 
 def search_for_miscrit():
     """Step 1: Clicks to clear the area and then searches for Miscrits."""
@@ -149,7 +150,7 @@ def preprocess_image_for_ocr(image):
     enhanced_image = ImageOps.autocontrast(grayscale_image)  # Enhance contrast
     return enhanced_image
 
-def detect_target_miscrit(target_texts=["Freedom"]):
+def detect_target_miscrit(target_texts=["Foil Vhisp"]):
     """Detect if any of the target Miscrit texts appear on screen and show alert if found."""
     print("Checking for target Miscrit texts...")
 
@@ -183,8 +184,9 @@ def detect_target_miscrit(target_texts=["Freedom"]):
 def detect_evolved_text():
     """Detect if the 'evolved' text is visible on the screen."""
     print("Checking for 'evolved' text...")
+    time.sleep(2)
     try:
-        evolved_location = pyautogui.locateOnScreen('evolved.png', confidence=0.7)
+        evolved_location = pyautogui.locateOnScreen('evolved.png', confidence=0.8)
         if evolved_location:
             print("'Evolved' text detected!")
             return True
@@ -222,6 +224,7 @@ def fight_miscrit():
 
         print("Clicking Attack button...")
         pyautogui.click(ATTACK_BUTTON_COORDS)
+        time.sleep(3)
         print(f"Clicked on Attack button at {ATTACK_BUTTON_COORDS}")
 
         # Check for win screen after attacking
