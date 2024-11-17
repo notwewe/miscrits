@@ -41,14 +41,14 @@ SEARCH_DROP_REGION = (795, 350, 272, 211)
 def check_and_click_search_drop():
     """Check if any search drop is visible in the defined region and click it."""
     print("Checking for search drops in the main region...")
-    time.sleep(2)
+    time.sleep(1)
     for drop_image in search_drops:
         try:
             drop_location = pyautogui.locateOnScreen(drop_image, region=SEARCH_DROP_REGION, confidence=0.7)
             if drop_location:
                 print(f"Search drop found: {drop_image}. Clicking...")
                 pyautogui.click(pyautogui.center(drop_location))
-                time.sleep(2)  # Wait for actions triggered by the click
+                time.sleep(1)  # Wait for actions triggered by the click
                 return True  # If a search drop is found and clicked, return True
         except pyautogui.ImageNotFoundException:
             print(f"Error: {drop_image} not found on screen.")
@@ -58,7 +58,7 @@ def clear_area_for_visibility():
     print("Clearing the area for visibility...")
     # Click to clear the area (adjust coordinates as necessary)
     pyautogui.click(1040, 540)  
-    time.sleep(1.5)  # Wait for area to be cleared
+    time.sleep(1)  # Wait for area to be cleared
 
 def search_for_miscrit():
     """Step 1: Clicks to clear the area and then searches for Miscrits."""
@@ -71,7 +71,7 @@ def search_for_miscrit():
                 print(f"Search area found: {search_area}. Clicking to search for Miscrit...")
                 search_area_center = pyautogui.center(search_area_location)
                 pyautogui.click(search_area_center)
-                time.sleep(4)  # Wait to ensure the search starts
+                time.sleep(3)  # Wait to ensure the search starts
 
                 # Now check if the Miscrit is found
                 if is_miscrit_found():
@@ -141,6 +141,34 @@ def show_alert():
     button.pack(pady=10)
     alert.mainloop()
 
+def detect_new_miscrit(capture_region=(727, 407, 164, 38), expected_text="New Miscrit"):
+    """
+    Detect if a new Miscrit text appears on the screen after closing the win screen.
+    """
+    print("Checking for new Miscrit text...")
+    time.sleep(3)
+    def ocr_task():
+        try:
+            screenshot = pyautogui.screenshot(region=capture_region)  # Capture the specified region
+            screenshot = preprocess_image_for_ocr(screenshot)  # Preprocess the image for OCR
+            text_in_region = pytesseract.image_to_string(screenshot)  # OCR text detection
+            return text_in_region.strip()
+        except Exception as e:
+            print(f"Error in OCR: {e}")
+            return ""
+
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        future = executor.submit(ocr_task)  # Run OCR in a separate thread
+        text_in_region = future.result()  # Get OCR result
+
+    # Check if the expected text is detected in the region
+    if expected_text in text_in_region:
+        print(f"New Miscrit text detected: '{expected_text}'.")
+        return True  # Indicate that the new Miscrit text was found
+
+    print("No new Miscrit text detected.")
+    return False
+
 from PIL import ImageOps
 import concurrent.futures
 
@@ -150,41 +178,69 @@ def preprocess_image_for_ocr(image):
     enhanced_image = ImageOps.autocontrast(grayscale_image)  # Enhance contrast
     return enhanced_image
 
-def detect_target_miscrit(target_texts=["Foil Thundercracker"]):
-    """Detect if any of the target Miscrit texts appear on screen and show alert if found."""
+def detect_target_miscrit(target_texts=["Peekly", "Felis", "Owlie"], capture_text="Catch"):
+    """Detect if any of the target Miscrit texts appear on screen and attack it once."""
     print("Checking for target Miscrit texts...")
 
-    def ocr_task():
+    def ocr_task(region):
         try:
-
-            search_region = (1219, 71, 109, 26)  # Width = 1328 - 1219, Height = 97 - 71
-
-            screenshot = pyautogui.screenshot(region=search_region)  # Capture region
+            screenshot = pyautogui.screenshot(region=region)  # Capture region
             screenshot = preprocess_image_for_ocr(screenshot)  # Preprocess image
             text_in_region = pytesseract.image_to_string(screenshot)  # OCR text detection
-            return text_in_region
+            return text_in_region.strip()
         except Exception as e:
             print(f"Error in OCR: {e}")
             return ""
 
+    # Define regions for OCR checks
+    miscrit_region = (1219, 71, 109, 26)  # Region for target Miscrit detection
+    capture_region = (723, 433, 137, 34)
+
+    # Detect target Miscrit
     with concurrent.futures.ThreadPoolExecutor() as executor:
-        future = executor.submit(ocr_task)  # Run OCR in a separate thread
+        future = executor.submit(ocr_task, miscrit_region)  # Run OCR for Miscrit region
         text_in_region = future.result()  # Get OCR result
 
-    # Check if any of the target texts with first letter capitalized are in the detected text
+    # Check if any of the target texts are in the detected text
     for target_text in target_texts:
         if target_text in text_in_region:
-            print(f"Target Miscrit '{target_text}' detected! Showing alert.")
-            show_alert()  # Trigger alert if Miscrit detected
-            return True  # Return True when any of the target Miscrits are found
+            print(f"Target Miscrit '{target_text}' detected! Attacking once.")
+            # Attack the target Miscrit using the provided coordinates
+            # pyautogui.click(ATTACK_BUTTON_COORDS)  # Click Attack button
+            time.sleep(2)  # Pause before next action
+            pyautogui.click(850, 954)  # Click the additional button
+            time.sleep(6)  # Pause to ensure the action is registered
+            pyautogui.click(850, 954)  # Click the additional button
+            time.sleep(6)  # Pause to ensure the action is registered
+            pyautogui.click(960, 159)  # Click the additional button
+            time.sleep(5)
+            pyautogui.click(878, 605)  # Click capture button 2
+            time.sleep(2)
+
+            # Check for capture text
+            print("Checking for capture text...")
+            time.sleep(3)
+            capture_text_detected = ocr_task(capture_region)
+            if capture_text in capture_text_detected:
+                print("Capture text found! Performing capture actions.")
+                time.sleep(5)
+                pyautogui.click(912, 598)  # Click capture button 1
+                time.sleep(2)
+                pyautogui.click(878, 605)  # Click capture button 2
+                time.sleep(2)
+            else:
+                print("Capture text not found.")
+
+            return True  # Indicate that the target Miscrit was found and attacked
 
     print("None of the target Miscrit texts were found.")
     return False
 
+
 def detect_evolved_text():
     """Detect if the 'evolved' text is visible on the screen."""
     print("Checking for 'evolved' text...")
-    time.sleep(2)
+    #time.sleep(2)
     try:
         evolved_location = pyautogui.locateOnScreen('evolved.png', confidence=0.8)
         if evolved_location:
@@ -202,7 +258,6 @@ def is_miscrit_found():
     pyautogui.screenshot('debug_before_fight.png')  # Capture a screenshot right before checking for the Miscrit
     miscrit_location = pyautogui.locateOnScreen(MISCRIT_IMAGE, confidence=0.7)
     return miscrit_location is not None
-
 def fight_miscrit():
     """Step 3: Engages in the fight by clicking the Attack button until the battle ends."""
     print("Entering battle loop...")
@@ -217,9 +272,9 @@ def fight_miscrit():
     while not battle_ended:  # Continue loop until battle ends
         # If target Miscrit is detected, pause the attack
         if detect_target_miscrit():
-            print("Target Miscrit detected! Pausing attack.")
+            print("Target Miscrit detected!")
             # Allow manual interaction after detecting the target Miscrit
-            time.sleep(5)  # You can adjust the sleep time to suit your needs
+            time.sleep(2)  # You can adjust the sleep time to suit your needs
             continue  # Continue to the next attack phase
 
         print("Clicking Attack button...")
@@ -231,13 +286,31 @@ def fight_miscrit():
         if locate_win_screen():
             print("Win screen detected!")
             time.sleep(2.5)
-            if detect_ready_to_train():  # Check if 'Ready to Train' screen is visible
-                pyautogui.click(CLOSE_BUTTON_COORDS)  # Close win screen
+
+            # Prioritize checking for a new Miscrit before handling 'Ready to Train'
+            time.sleep(2)
+            if detect_new_miscrit():
+                print("New Miscrit detected after win screen. Initiating capture process...")
+                pyautogui.click(1005, 615)  # Click the additional button
+                time.sleep(1)
+
+            # Handle 'Ready to Train' after checking for new Miscrit
+            if detect_ready_to_train():
                 print("Ready to Train detected. Proceeding to training...")
                 handle_training()  # Proceed to training
             else:
                 print("No Ready to Train detected. Closing win screen.")
                 pyautogui.click(CLOSE_BUTTON_COORDS)  # Close win screen
+                time.sleep(2)  # Allow time for the screen to close
+
+                # Check for a new Miscrit again after closing the win screen
+                if detect_new_miscrit():
+                    print("New Miscrit detected after closing win screen. Initiating capture process...")
+                    pyautogui.click(1005, 615)  # Click the additional button
+                    time.sleep(1)
+                else:
+                    print("No new Miscrit detected after closing win screen.")
+
             battle_ended = True  # Mark the battle as ended
             break  # Exit battle loop
 
@@ -300,7 +373,7 @@ def handle_training():
 
     # Wait for animation to complete before checking for evolved text
     print("Waiting for evolution animation to complete...")
-    time.sleep(2)  # Increased delay to 2 seconds for evolution animation
+    time.sleep(1)  # Increased delay to 2 seconds for evolution animation
 
     # Check for evolved text
     evolved_detected = False
