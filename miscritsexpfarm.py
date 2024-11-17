@@ -15,7 +15,7 @@ pygame.init()
 
 # Image paths for detecting the battle screen, Close button, and multiple Search areas
 CLOSE_BUTTON_IMAGE = 'close.png'
-SEARCH_AREAS = ['foilw.png']
+SEARCH_AREAS = ['foilT.png']
 WIN_SCREEN_IMAGE = 'win (2).png'
 READY_TO_TRAIN_IMAGE = 'readytotrain.png'
 #TARGET_MISCRIT_IMAGE = 'lightzap2.png'
@@ -150,7 +150,7 @@ def preprocess_image_for_ocr(image):
     enhanced_image = ImageOps.autocontrast(grayscale_image)  # Enhance contrast
     return enhanced_image
 
-def detect_target_miscrit(target_texts=["Foil Vhisp"]):
+def detect_target_miscrit(target_texts=["Foil Thundercracker"]):
     """Detect if any of the target Miscrit texts appear on screen and show alert if found."""
     print("Checking for target Miscrit texts...")
 
@@ -291,38 +291,34 @@ def handle_training():
         pyautogui.click((780, 901))  # Plat train button
         print("Plat train clicked for 'S' or 'S+' Miscrit.")
         time.sleep(1)
-        pyautogui.click(CONTINUE_BUTTON_COORDS)
-        time.sleep(1)
-        pyautogui.click(CONTINUE_BUTTON_COORDS2)
-        time.sleep(1)
 
-        # Wait for animation to complete before checking for evolved text
-        print("Waiting for evolution animation to complete...")
-        time.sleep(2)  # Increased delay to 2 seconds for evolution animation
+    # Continue through training regardless of "S" or "S+"
+    pyautogui.click(CONTINUE_BUTTON_COORDS)
+    time.sleep(1)
+    pyautogui.click(CONTINUE_BUTTON_COORDS2)
+    time.sleep(1)
 
-        # Check for evolved text after plat training
-        evolved_detected = False
-        for attempt in range(3):  # Increased retries to 3
-            if detect_evolved_text():
-                evolved_detected = True
-                print("Evolved text detected on attempt", attempt + 1)
-                pyautogui.click((898, 824))  # Click evolved Miscrit
-                time.sleep(1)
-                pyautogui.click((898, 764))  # Confirm evolution
-                time.sleep(1)
-                break
-            else:
-                print(f"Attempt {attempt + 1}: Evolved text not detected. Retrying...")
-                time.sleep(1)  # Delay before retrying
+    # Wait for animation to complete before checking for evolved text
+    print("Waiting for evolution animation to complete...")
+    time.sleep(2)  # Increased delay to 2 seconds for evolution animation
 
-        if not evolved_detected:
-            print("Evolved text not detected after retries. Proceeding without evolution action.")
-    else:
-        # Skip plat train actions if it's not an 'S' or 'S+' Miscrit
-        pyautogui.click(CONTINUE_BUTTON_COORDS)
-        time.sleep(1)
-        pyautogui.click(CONTINUE_BUTTON_COORDS2)
-        time.sleep(1)
+    # Check for evolved text
+    evolved_detected = False
+    for attempt in range(3):  # Increased retries to 3
+        if detect_evolved_text():
+            evolved_detected = True
+            print("Evolved text detected on attempt", attempt + 1)
+            pyautogui.click((898, 824))  # Click evolved Miscrit
+            time.sleep(1)
+            pyautogui.click((898, 764))  # Confirm evolution
+            time.sleep(1)
+            break
+        else:
+            print(f"Attempt {attempt + 1}: Evolved text not detected. Retrying...")
+            #time.sleep(1)  # Delay before retrying
+
+    if not evolved_detected:
+        print("Evolved text not detected after retries. Proceeding without evolution action.")
 
     # Close the training window
     print("Closing the training window...")
