@@ -15,7 +15,7 @@ pygame.init()
 
 # Image paths for detecting the battle screen, Close button, and multiple Search areas
 CLOSE_BUTTON_IMAGE = 'close.png'
-SEARCH_AREAS = ['foilT.png']
+SEARCH_AREAS = ['dp.png']
 WIN_SCREEN_IMAGE = 'win (2).png'
 READY_TO_TRAIN_IMAGE = 'readytotrain.png'
 #TARGET_MISCRIT_IMAGE = 'lightzap2.png'
@@ -186,7 +186,7 @@ def preprocess_image_for_ocr(image):
     enhanced_image = ImageOps.autocontrast(grayscale_image)  # Enhance contrast
     return enhanced_image
 
-def detect_target_miscrit(target_texts=["Peekly", "Felis", "Owlie"], capture_text="Catch"):
+def detect_target_miscrit(target_texts=["Peekly", "Felis", "Owlie", "Dark Poltergust"], capture_text="Catch"):
     """Detect if any of the target Miscrit texts appear on screen and attack it once."""
     print("Checking for target Miscrit texts...")
 
@@ -217,20 +217,23 @@ def detect_target_miscrit(target_texts=["Peekly", "Felis", "Owlie"], capture_tex
             # pyautogui.click(ATTACK_BUTTON_COORDS)  # Click Attack button
             time.sleep(2)  # Pause before next action
             pyautogui.click(850, 954)  # Click the additional button
+            print(f"Making another move...")
+            time.sleep(3)  # Pause to ensure the action is registered
+            pyautogui.click(1425, 951)  # Click the additional button
             print(f"Target Miscrit '{target_text}' detected! Attack 2/2.")
-            time.sleep(6)  # Pause to ensure the action is registered
-            pyautogui.click(850, 954)  # Click the additional button
+            time.sleep(3)  # Pause to ensure the action is registered
+            pyautogui.click(862, 952)  # Click the additional button
             print(f"Pressing Capture...")
             time.sleep(6)  # Pause to ensure the action is registered
             pyautogui.click(960, 159)  # Click the additional button
             print(f"Pressing Skip...")
-            time.sleep(6)
+            time.sleep(5)
             pyautogui.click(878, 605)  # Click capture button 2
             time.sleep(2)
 
             # Check for capture text
             print("Checking for catch text...")
-            time.sleep(3)
+            time.sleep(2)
             capture_text_detected = ocr_task(capture_region)
             if capture_text in capture_text_detected:
                 print("Capture text found! Performing catch actions.")
@@ -297,7 +300,7 @@ def fight_miscrit():
         # Check for win screen after attacking
         if locate_win_screen():
             print("Win screen detected!")
-            time.sleep(2.5)
+            time.sleep(2)
 
             # Check for new Miscrit text
             new_miscrit_detected = False
