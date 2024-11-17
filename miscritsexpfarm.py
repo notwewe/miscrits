@@ -58,7 +58,7 @@ def clear_area_for_visibility():
     print("Clearing the area for visibility...")
     # Click to clear the area (adjust coordinates as necessary)
     pyautogui.click(1040, 540)  
-    time.sleep(1)  # Wait for area to be cleared
+    time.sleep(0.5)  # Wait for area to be cleared
 
 def search_for_miscrit():
     """Step 1: Clicks to clear the area and then searches for Miscrits."""
@@ -186,7 +186,7 @@ def preprocess_image_for_ocr(image):
     enhanced_image = ImageOps.autocontrast(grayscale_image)  # Enhance contrast
     return enhanced_image
 
-def detect_target_miscrit(target_texts=["Peekly", "Felis", "Owlie", "Dark Poltergust"], capture_text="Catch"):
+def detect_target_miscrit(target_texts=["Dark Poltergust", "Peekly", "Owlie"], capture_text="Catch"):
     """Detect if any of the target Miscrit texts appear on screen and attack it once."""
     print("Checking for target Miscrit texts...")
 
@@ -289,26 +289,26 @@ def fight_miscrit():
         if detect_target_miscrit():
             print("Target Miscrit detected!")
             # Allow manual interaction after detecting the target Miscrit
-            time.sleep(2)  # You can adjust the sleep time to suit your needs
+            time.sleep(1)  # You can adjust the sleep time to suit your needs
             continue  # Continue to the next attack phase
 
         print("Clicking Attack button...")
         pyautogui.click(ATTACK_BUTTON_COORDS)
-        time.sleep(3)
+        time.sleep(1)
         print(f"Clicked on Attack button at {ATTACK_BUTTON_COORDS}")
 
         # Check for win screen after attacking
         if locate_win_screen():
             print("Win screen detected!")
-            time.sleep(2)
+            time.sleep(1)
 
             # Check for new Miscrit text
             new_miscrit_detected = False
             if detect_new_miscrit():
                 new_miscrit_detected = True
-                print("New Miscrit detected after win screen. Keep...")
-                pyautogui.click(1005, 615)  # Click the additional button
-                time.sleep(1)
+                print("New Miscrit detected...")
+                # pyautogui.click(1005, 615)  # Click the additional button
+                # time.sleep(1)
 
             # Check for "Ready to Train" in the win screen
             ready_to_train_detected = False
@@ -319,21 +319,27 @@ def fight_miscrit():
             # Close the win screen
             print("Closing win screen...")
             pyautogui.click(CLOSE_BUTTON_COORDS)  # Close win screen
-            time.sleep(2)  # Allow time for the screen to close
+            time.sleep(1)  # Allow time for the screen to close
 
              # Check for new Miscrit text
-            new_miscrit_detected = False
+            #new_miscrit_detected = False
             if detect_new_miscrit():
-                new_miscrit_detected = True
-                print("New Miscrit detected after win screen. Initiating capture process...")
+                #new_miscrit_detected = True
+                print("New Miscrit detected after win screen. Keeping...")
                 pyautogui.click(1005, 615)  # Click the additional button
                 time.sleep(1)
-
-            # If new Miscrit is detected, perform action first
-            if new_miscrit_detected:
-                print("Performing action for new Miscrit detection...")
-                pyautogui.click(1005, 615)  # Click the additional button again
+                pyautogui.click(448, 75)  # Click the additional button
                 time.sleep(1)
+
+                # Perform drag and drop after the time.sleep
+                start_coords = (1026, 455)  # Replace with the actual starting coordinates
+                end_coords = (972, 645)    # Replace with the actual ending coordinates
+                pyautogui.moveTo(start_coords[0], start_coords[1])  # Move to the starting position
+                pyautogui.mouseDown()  # Hold down the mouse button
+                pyautogui.moveTo(end_coords[0], end_coords[1], duration=0.5)  # Drag to the ending position
+                pyautogui.mouseUp()  # Release the mouse button
+                print(f"Dragged from {start_coords} to {end_coords}.")
+                pyautogui.click(1272, 884)  # Click the additional button
 
             # If "Ready to Train" is detected, proceed to training
             if ready_to_train_detected:
