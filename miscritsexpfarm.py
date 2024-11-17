@@ -141,17 +141,25 @@ def show_alert():
     button.pack(pady=10)
     alert.mainloop()
 
-def detect_new_miscrit(capture_region=(727, 407, 164, 38), expected_text="New Miscrit"):
+import pytesseract
+import pyautogui
+import time
+import concurrent.futures
+
+def detect_new_miscrit(capture_region = (728, 409, 163, 37), expected_text="New Miscrit"):
     """
     Detect if a new Miscrit text appears on the screen after closing the win screen.
     """
     print("Checking for new Miscrit text...")
-    time.sleep(3)
+    time.sleep(3)  # Adjust timing to allow for the screen to update
+
     def ocr_task():
         try:
             screenshot = pyautogui.screenshot(region=capture_region)  # Capture the specified region
+            screenshot.save("screenshot.png")  # Save screenshot for debugging
             screenshot = preprocess_image_for_ocr(screenshot)  # Preprocess the image for OCR
             text_in_region = pytesseract.image_to_string(screenshot)  # OCR text detection
+            print(f"OCR detected text: '{text_in_region}'")  # Debug print for OCR output
             return text_in_region.strip()
         except Exception as e:
             print(f"Error in OCR: {e}")
@@ -204,32 +212,35 @@ def detect_target_miscrit(target_texts=["Peekly", "Felis", "Owlie"], capture_tex
     # Check if any of the target texts are in the detected text
     for target_text in target_texts:
         if target_text in text_in_region:
-            print(f"Target Miscrit '{target_text}' detected! Attacking once.")
+            print(f"Target Miscrit '{target_text}' detected! Attack 1/2.")
             # Attack the target Miscrit using the provided coordinates
             # pyautogui.click(ATTACK_BUTTON_COORDS)  # Click Attack button
             time.sleep(2)  # Pause before next action
             pyautogui.click(850, 954)  # Click the additional button
+            print(f"Target Miscrit '{target_text}' detected! Attack 2/2.")
             time.sleep(6)  # Pause to ensure the action is registered
             pyautogui.click(850, 954)  # Click the additional button
+            print(f"Pressing Capture...")
             time.sleep(6)  # Pause to ensure the action is registered
             pyautogui.click(960, 159)  # Click the additional button
-            time.sleep(5)
+            print(f"Pressing Skip...")
+            time.sleep(6)
             pyautogui.click(878, 605)  # Click capture button 2
             time.sleep(2)
 
             # Check for capture text
-            print("Checking for capture text...")
+            print("Checking for catch text...")
             time.sleep(3)
             capture_text_detected = ocr_task(capture_region)
             if capture_text in capture_text_detected:
-                print("Capture text found! Performing capture actions.")
+                print("Capture text found! Performing catch actions.")
                 time.sleep(5)
                 pyautogui.click(912, 598)  # Click capture button 1
                 time.sleep(2)
                 pyautogui.click(878, 605)  # Click capture button 2
                 time.sleep(2)
             else:
-                print("Capture text not found.")
+                print("Catch text not found.")
 
             return True  # Indicate that the target Miscrit was found and attacked
 
@@ -258,6 +269,7 @@ def is_miscrit_found():
     pyautogui.screenshot('debug_before_fight.png')  # Capture a screenshot right before checking for the Miscrit
     miscrit_location = pyautogui.locateOnScreen(MISCRIT_IMAGE, confidence=0.7)
     return miscrit_location is not None
+
 def fight_miscrit():
     """Step 3: Engages in the fight by clicking the Attack button until the battle ends."""
     print("Entering battle loop...")
@@ -287,40 +299,50 @@ def fight_miscrit():
             print("Win screen detected!")
             time.sleep(2.5)
 
-            # Prioritize checking for a new Miscrit before handling 'Ready to Train'
-            time.sleep(2)
+            # Check for new Miscrit text
+            new_miscrit_detected = False
             if detect_new_miscrit():
+                new_miscrit_detected = True
+                print("New Miscrit detected after win screen. Keep...")
+                pyautogui.click(1005, 615)  # Click the additional button
+                time.sleep(1)
+
+            # Check for "Ready to Train" in the win screen
+            ready_to_train_detected = False
+            if detect_ready_to_train():
+                ready_to_train_detected = True
+                print("Ready to Train detected. Proceeding to handle training...")
+
+            # Close the win screen
+            print("Closing win screen...")
+            pyautogui.click(CLOSE_BUTTON_COORDS)  # Close win screen
+            time.sleep(2)  # Allow time for the screen to close
+
+             # Check for new Miscrit text
+            new_miscrit_detected = False
+            if detect_new_miscrit():
+                new_miscrit_detected = True
                 print("New Miscrit detected after win screen. Initiating capture process...")
                 pyautogui.click(1005, 615)  # Click the additional button
                 time.sleep(1)
 
-            # Handle 'Ready to Train' after checking for new Miscrit
-            if detect_ready_to_train():
-                print("Ready to Train detected. Proceeding to training...")
+            # If new Miscrit is detected, perform action first
+            if new_miscrit_detected:
+                print("Performing action for new Miscrit detection...")
+                pyautogui.click(1005, 615)  # Click the additional button again
+                time.sleep(1)
+
+            # If "Ready to Train" is detected, proceed to training
+            if ready_to_train_detected:
+                print("Starting the training sequence...")
                 handle_training()  # Proceed to training
-            else:
-                print("No Ready to Train detected. Closing win screen.")
-                pyautogui.click(CLOSE_BUTTON_COORDS)  # Close win screen
-                time.sleep(2)  # Allow time for the screen to close
 
-                # Check for a new Miscrit again after closing the win screen
-                if detect_new_miscrit():
-                    print("New Miscrit detected after closing win screen. Initiating capture process...")
-                    pyautogui.click(1005, 615)  # Click the additional button
-                    time.sleep(1)
-                else:
-                    print("No new Miscrit detected after closing win screen.")
-
+            # Proceed to next steps, either battle ends or next encounter
             battle_ended = True  # Mark the battle as ended
             break  # Exit battle loop
 
-        # Optional: Check for other failure conditions like timeout
-        if time.time() - start_time > MAX_BATTLE_TIME:  # Add max battle time if necessary
-            print("Max battle time reached, ending battle.")
-            battle_ended = True
-            break
-
-    print("Returning to search for next encounter...")
+    print("Battle completed. Returning to search for next encounter...")
+    # Additional cleanup or next steps can follow
 
 def detect_S():
     """Detects 'S' Miscrit within the selected screen region."""
