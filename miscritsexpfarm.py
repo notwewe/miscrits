@@ -15,7 +15,7 @@ pygame.init()
 
 # Image paths for detecting the battle screen, Close button, and multiple Search areas
 CLOSE_BUTTON_IMAGE = 'close.png'
-SEARCH_AREAS = ['dp.png']
+SEARCH_AREAS = ['lightS.png']
 WIN_SCREEN_IMAGE = 'win (2).png'
 READY_TO_TRAIN_IMAGE = 'readytotrain.png'
 #TARGET_MISCRIT_IMAGE = 'lightzap2.png'
@@ -23,8 +23,11 @@ MISCRIT_IMAGE = 'battle10.png'  # Path to the image of the Miscrit you're lookin
 search_drops = ["gold.png", "potion.png", "potion2.png"]
 
 # Fixed coordinates for buttons (replace with actual coordinates)
-ATTACK_BUTTON_COORDS = (643, 947)
+#pyautogui.click(850, 954)  # Click the additional button
+#ATTACK_BUTTON_COORDS = (643, 947)
 CLOSE_BUTTON_COORDS = (902, 816)
+ATTACK_BUTTON_COORDS = (850, 954)
+
 TRAIN_BUTTON_COORDS = (563, 78)
 MISCRIT_TO_TRAIN_COORDS = (606, 307)
 TRAIN_NOW_BUTTON_COORDS = (938, 194)
@@ -71,7 +74,7 @@ def search_for_miscrit():
                 print(f"Search area found: {search_area}. Clicking to search for Miscrit...")
                 search_area_center = pyautogui.center(search_area_location)
                 pyautogui.click(search_area_center)
-                time.sleep(3)  # Wait to ensure the search starts
+                time.sleep(4)  # Wait to ensure the search starts
 
                 # Now check if the Miscrit is found
                 if is_miscrit_found():
@@ -186,13 +189,14 @@ def preprocess_image_for_ocr(image):
     enhanced_image = ImageOps.autocontrast(grayscale_image)  # Enhance contrast
     return enhanced_image
 
-def detect_target_miscrit(target_texts=["Dark Poltergust", "Peekly", "Owlie"], capture_text="Catch"):
+def detect_target_miscrit(target_texts=["Dark Poltergust", "Light Snorkels"], capture_text="Catch"):
     """Detect if any of the target Miscrit texts appear on screen and attack it once."""
     print("Checking for target Miscrit texts...")
 
     def ocr_task(region):
         try:
             screenshot = pyautogui.screenshot(region=region)  # Capture region
+            screenshot.save("target.png")  # Save screenshot for debugging
             screenshot = preprocess_image_for_ocr(screenshot)  # Preprocess image
             text_in_region = pytesseract.image_to_string(screenshot)  # OCR text detection
             return text_in_region.strip()
@@ -201,7 +205,7 @@ def detect_target_miscrit(target_texts=["Dark Poltergust", "Peekly", "Owlie"], c
             return ""
 
     # Define regions for OCR checks
-    miscrit_region = (1219, 71, 109, 26)  # Region for target Miscrit detection
+    miscrit_region = (1213, 75, 102, 29)  # Region for target Miscrit detection
     capture_region = (723, 433, 137, 34)
 
     # Detect target Miscrit
@@ -237,7 +241,7 @@ def detect_target_miscrit(target_texts=["Dark Poltergust", "Peekly", "Owlie"], c
             capture_text_detected = ocr_task(capture_region)
             if capture_text in capture_text_detected:
                 print("Capture text found! Performing catch actions.")
-                time.sleep(5)
+                time.sleep(2)
                 pyautogui.click(912, 598)  # Click capture button 1
                 time.sleep(2)
                 pyautogui.click(878, 605)  # Click capture button 2
@@ -434,9 +438,9 @@ def toggle_running_state():
     global running
     running = not running
     if running:
-        print("Script started. Press Enter again to stop.")
+        print("Script started. Press Enter again to stop.\n")
     else:
-        print("Script stopped. Press Enter to start again.")
+        print("Script stopped. Press Enter to start again.\n")
 def highlight_search_region():
 
     #search_region = (1219, 71, 109, 26)  # Width = 1328 - 1219, Height = 97 - 71
@@ -458,7 +462,7 @@ def highlight_search_region():
 def main_loop():
     """Main loop that runs while the script is in the running state."""
     global running
-    search_timeout = 30  # Max time (seconds) to search for Miscrits before retrying
+    search_timeout = 1000  # Max time (seconds) to search for Miscrits before retrying
     while True:
         if not running:
             continue
@@ -477,6 +481,7 @@ def main_loop():
                 if search_for_miscrit():
                     print("Miscrit found! Entering battle...")
                     fight_miscrit()  # Proceed with battle if found
+                    print("Fighting Miscrit...")
                     break
                 else:
                     print("No Miscrit found, retrying search...")
