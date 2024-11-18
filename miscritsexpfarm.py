@@ -15,7 +15,7 @@ pygame.init()
 
 # Image paths for detecting the battle screen, Close button, and multiple Search areas
 CLOSE_BUTTON_IMAGE = 'close.png'
-SEARCH_AREAS = ['lightS.png']
+SEARCH_AREAS = ['lightIG.png']
 WIN_SCREEN_IMAGE = 'win (2).png'
 READY_TO_TRAIN_IMAGE = 'readytotrain.png'
 #TARGET_MISCRIT_IMAGE = 'lightzap2.png'
@@ -24,9 +24,9 @@ search_drops = ["gold.png", "potion.png", "potion2.png"]
 
 # Fixed coordinates for buttons (replace with actual coordinates)
 #pyautogui.click(850, 954)  # Click the additional button
-#ATTACK_BUTTON_COORDS = (643, 947)
+ATTACK_BUTTON_COORDS = (643, 947)
 CLOSE_BUTTON_COORDS = (902, 816)
-ATTACK_BUTTON_COORDS = (850, 954)
+#ATTACK_BUTTON_COORDS = (850, 954)
 
 TRAIN_BUTTON_COORDS = (563, 78)
 MISCRIT_TO_TRAIN_COORDS = (606, 307)
@@ -60,7 +60,7 @@ def check_and_click_search_drop():
 def clear_area_for_visibility():
     print("Clearing the area for visibility...")
     # Click to clear the area (adjust coordinates as necessary)
-    pyautogui.click(1040, 540)  
+    pyautogui.click(1133, 493)  
     time.sleep(0.5)  # Wait for area to be cleared
 
 def search_for_miscrit():
@@ -189,7 +189,7 @@ def preprocess_image_for_ocr(image):
     enhanced_image = ImageOps.autocontrast(grayscale_image)  # Enhance contrast
     return enhanced_image
 
-def detect_target_miscrit(target_texts=["Dark Poltergust", "Light Snorkels"], capture_text="Catch"):
+def detect_target_miscrit(target_texts=["Dark Poltergust", "Light Snorkels", "Light Ignios"], capture_text="Catch"):
     """Detect if any of the target Miscrit texts appear on screen and attack it once."""
     print("Checking for target Miscrit texts...")
 
@@ -224,9 +224,12 @@ def detect_target_miscrit(target_texts=["Dark Poltergust", "Light Snorkels"], ca
             print(f"Making another move...")
             time.sleep(3)  # Pause to ensure the action is registered
             pyautogui.click(1425, 951)  # Click the additional button
-            print(f"Target Miscrit '{target_text}' detected! Attack 2/2.")
+            print(f"Target Miscrit '{target_text}' detected! Attack 2/3.")
             time.sleep(3)  # Pause to ensure the action is registered
-            pyautogui.click(862, 952)  # Click the additional button
+            pyautogui.click(850, 954)  # Click the additional button
+            print(f"Target Miscrit '{target_text}' detected! Attack 3/3.")
+            time.sleep(3)  # Pause to ensure the action is registered
+            pyautogui.click(866, 941)  # Click the additional button
             print(f"Pressing Capture...")
             time.sleep(6)  # Pause to ensure the action is registered
             pyautogui.click(960, 159)  # Click the additional button
@@ -293,6 +296,7 @@ def fight_miscrit():
         if detect_target_miscrit():
             print("Target Miscrit detected!")
             # Allow manual interaction after detecting the target Miscrit
+            show_alert()
             time.sleep(1)  # You can adjust the sleep time to suit your needs
             continue  # Continue to the next attack phase
 
@@ -301,7 +305,8 @@ def fight_miscrit():
         time.sleep(1)
         print(f"Clicked on Attack button at {ATTACK_BUTTON_COORDS}")
 
-        # Check for win screen after attacking
+        # Check for win screen after
+
         if locate_win_screen():
             print("Win screen detected!")
             time.sleep(1)
@@ -319,7 +324,6 @@ def fight_miscrit():
             if detect_ready_to_train():
                 ready_to_train_detected = True
                 print("Ready to Train detected. Proceeding to handle training...")
-
             # Close the win screen
             print("Closing win screen...")
             pyautogui.click(CLOSE_BUTTON_COORDS)  # Close win screen
@@ -403,6 +407,7 @@ def handle_training():
     # Continue through training regardless of "S" or "S+"
     pyautogui.click(CONTINUE_BUTTON_COORDS)
     time.sleep(1)
+    pyautogui.click(CONTINUE_BUTTON_COORDS2)
     pyautogui.click(CONTINUE_BUTTON_COORDS2)
     time.sleep(1)
 
