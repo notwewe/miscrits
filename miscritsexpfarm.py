@@ -15,7 +15,7 @@ pygame.init()
 
 # Image paths for detecting the battle screen, Close button, and multiple Search areas
 CLOSE_BUTTON_IMAGE = 'close.png'
-SEARCH_AREAS = ['lightIG.png']
+SEARCH_AREAS = ['raldio.png']
 WIN_SCREEN_IMAGE = 'win (2).png'
 READY_TO_TRAIN_IMAGE = 'readytotrain.png'
 #TARGET_MISCRIT_IMAGE = 'lightzap2.png'
@@ -39,12 +39,12 @@ SEARCH_REGION = (491, 316, 514 - 491, 338 - 316)
 
 running = False
 
-SEARCH_DROP_REGION = (795, 350, 272, 211)  
+SEARCH_DROP_REGION = (841, 435, 273, 121) 
 
 def check_and_click_search_drop():
     """Check if any search drop is visible in the defined region and click it."""
     print("Checking for search drops in the main region...")
-    time.sleep(1)
+    #time.sleep(1)
     for drop_image in search_drops:
         try:
             drop_location = pyautogui.locateOnScreen(drop_image, region=SEARCH_DROP_REGION, confidence=0.7)
@@ -60,7 +60,7 @@ def check_and_click_search_drop():
 def clear_area_for_visibility():
     print("Clearing the area for visibility...")
     # Click to clear the area (adjust coordinates as necessary)
-    pyautogui.click(1133, 493)  
+    pyautogui.click(822, 475)  
     time.sleep(0.5)  # Wait for area to be cleared
 
 def search_for_miscrit():
@@ -154,7 +154,7 @@ def detect_new_miscrit(capture_region = (728, 409, 163, 37), expected_text="New 
     Detect if a new Miscrit text appears on the screen after closing the win screen.
     """
     print("Checking for new Miscrit text...")
-    time.sleep(3)  # Adjust timing to allow for the screen to update
+    time.sleep(1.5)  # Adjust timing to allow for the screen to update
 
     def ocr_task():
         try:
@@ -189,7 +189,7 @@ def preprocess_image_for_ocr(image):
     enhanced_image = ImageOps.autocontrast(grayscale_image)  # Enhance contrast
     return enhanced_image
 
-def detect_target_miscrit(target_texts=["Dark Poltergust", "Light Snorkels", "Light Ignios"], capture_text="Catch"):
+def detect_target_miscrit(target_texts=["Dark Poltergust", "Light Snorkels", "Light Ignios", "Peepsie", "Raldio", "Dark Slithero"], capture_text="Catch"):
     """Detect if any of the target Miscrit texts appear on screen and attack it once."""
     print("Checking for target Miscrit texts...")
 
@@ -216,13 +216,14 @@ def detect_target_miscrit(target_texts=["Dark Poltergust", "Light Snorkels", "Li
     # Check if any of the target texts are in the detected text
     for target_text in target_texts:
         if target_text in text_in_region:
+            show_alert()
             print(f"Target Miscrit '{target_text}' detected! Attack 1/2.")
             # Attack the target Miscrit using the provided coordinates
             # pyautogui.click(ATTACK_BUTTON_COORDS)  # Click Attack button
-            time.sleep(2)  # Pause before next action
-            pyautogui.click(850, 954)  # Click the additional button
-            print(f"Making another move...")
-            time.sleep(3)  # Pause to ensure the action is registered
+            #time.sleep(2)  # Pause before next action
+            #pyautogui.click(850, 954)  # Click the additional button
+            print(f"Making a move...")
+            time.sleep(4)  # Pause to ensure the action is registered
             pyautogui.click(1425, 951)  # Click the additional button
             print(f"Target Miscrit '{target_text}' detected! Attack 2/3.")
             time.sleep(3)  # Pause to ensure the action is registered
@@ -243,7 +244,7 @@ def detect_target_miscrit(target_texts=["Dark Poltergust", "Light Snorkels", "Li
             time.sleep(2)
             capture_text_detected = ocr_task(capture_region)
             if capture_text in capture_text_detected:
-                print("Capture text found! Performing catch actions.")
+                print("Catch text found! Performing catch actions.")
                 time.sleep(2)
                 pyautogui.click(912, 598)  # Click capture button 1
                 time.sleep(2)
@@ -296,7 +297,6 @@ def fight_miscrit():
         if detect_target_miscrit():
             print("Target Miscrit detected!")
             # Allow manual interaction after detecting the target Miscrit
-            show_alert()
             time.sleep(1)  # You can adjust the sleep time to suit your needs
             continue  # Continue to the next attack phase
 
@@ -399,21 +399,27 @@ def handle_training():
     pyautogui.click(TRAIN_NOW_BUTTON_COORDS)
     time.sleep(1)
 
+
+    # Check for S or S+ Miscrit before proceeding further
     if detect_S() or detect_S_plus():
+        print("S or S+ Miscrit found!")
         pyautogui.click((780, 901))  # Plat train button
         print("Plat train clicked for 'S' or 'S+' Miscrit.")
         time.sleep(1)
-
-    # Continue through training regardless of "S" or "S+"
+        #return  # Exit the function after Plat Train to avoid clicking Continue
+    
+    # Continue training if not S or S+
     pyautogui.click(CONTINUE_BUTTON_COORDS)
     time.sleep(1)
     pyautogui.click(CONTINUE_BUTTON_COORDS2)
-    pyautogui.click(CONTINUE_BUTTON_COORDS2)
     time.sleep(1)
+    print("Closing the training window...")
+    pyautogui.click(CLOSE_TRAIN_BUTTON_COORDS)
+    #time.sleep(1)
 
     # Wait for animation to complete before checking for evolved text
     print("Waiting for evolution animation to complete...")
-    time.sleep(1)  # Increased delay to 2 seconds for evolution animation
+    time.sleep(2)  # Increased delay to 2 seconds for evolution animation
 
     # Check for evolved text
     evolved_detected = False
@@ -425,18 +431,23 @@ def handle_training():
             time.sleep(1)
             pyautogui.click((898, 764))  # Confirm evolution
             time.sleep(1)
+            pyautogui.click((1022, 454))  # Blank space
+            time.sleep(1)
+            print("Closing the training window...")
+            pyautogui.click(CLOSE_TRAIN_BUTTON_COORDS)
+            #time.sleep(1)
             break
         else:
             print(f"Attempt {attempt + 1}: Evolved text not detected. Retrying...")
-            #time.sleep(1)  # Delay before retrying
+            time.sleep(1)  # Delay before retrying
 
     if not evolved_detected:
         print("Evolved text not detected after retries. Proceeding without evolution action.")
 
-    # Close the training window
-    print("Closing the training window...")
-    pyautogui.click(CLOSE_TRAIN_BUTTON_COORDS)
-    time.sleep(1)
+    # Ensure training window is closed
+    #print("Closing the training window (final check)...")
+    #pyautogui.click(CLOSE_TRAIN_BUTTON_COORDS)
+    #time.sleep(1)
 
 def toggle_running_state():
     """Toggle the running state of the script based on Enter key press."""
