@@ -15,52 +15,53 @@ pygame.init()
 
 # Image paths for detecting the battle screen, Close button, and multiple Search areas
 CLOSE_BUTTON_IMAGE = 'close.png'
-SEARCH_AREAS = ['raldio.png']
-WIN_SCREEN_IMAGE = 'win (2).png'
-READY_TO_TRAIN_IMAGE = 'readytotrain.png'
+SEARCH_AREAS = ['doorzz.png']
+WIN_SCREEN_IMAGE = 'summary.png'
+READY_TO_TRAIN_IMAGE = 'readytotrainimg.png'
 #TARGET_MISCRIT_IMAGE = 'lightzap2.png'
-MISCRIT_IMAGE = 'battle10.png'  # Path to the image of the Miscrit you're looking for
+MISCRIT_IMAGE = 'ABILI.png'  # Path to the image of the Miscrit you're looking for
 search_drops = ["gold.png", "potion.png", "potion2.png"]
 
 # Fixed coordinates for buttons (replace with actual coordinates)
 #pyautogui.click(850, 954)  # Click the additional button
-ATTACK_BUTTON_COORDS = (643, 947)
-CLOSE_BUTTON_COORDS = (902, 816)
+ATTACK_BUTTON_COORDS = (417, 804)
+CLOSE_BUTTON_COORDS = (632, 711)
 #ATTACK_BUTTON_COORDS = (850, 954)
 
-TRAIN_BUTTON_COORDS = (563, 78)
-MISCRIT_TO_TRAIN_COORDS = (606, 307)
-TRAIN_NOW_BUTTON_COORDS = (938, 194)
-CONTINUE_BUTTON_COORDS = (1074, 900)
-CONTINUE_BUTTON_COORDS2 = (895, 663)
-CLOSE_TRAIN_BUTTON_COORDS = (1332, 158)
+TRAIN_BUTTON_COORDS = (396, 179)
+MISCRIT_TO_TRAIN_COORDS = (435, 346)
+TRAIN_NOW_BUTTON_COORDS = (669, 264)
+CONTINUE_BUTTON_COORDS = (765, 772)
+CONTINUE_BUTTON_COORDS2 = (640, 598)
+CLOSE_TRAIN_BUTTON_COORDS = (951, 239)
 
-SEARCH_REGION = (491, 316, 514 - 491, 338 - 316)
+SEARCH_REGION = (349, 354, 22, 16)
 
 running = False
 
-SEARCH_DROP_REGION = (841, 435, 273, 121) 
+SEARCH_DROP_REGION = (576, 391, 171, 132) 
 
-def check_and_click_search_drop():
-    """Check if any search drop is visible in the defined region and click it."""
-    print("Checking for search drops in the main region...")
-    #time.sleep(1)
-    for drop_image in search_drops:
-        try:
-            drop_location = pyautogui.locateOnScreen(drop_image, region=SEARCH_DROP_REGION, confidence=0.7)
-            if drop_location:
-                print(f"Search drop found: {drop_image}. Clicking...")
-                pyautogui.click(pyautogui.center(drop_location))
-                time.sleep(1)  # Wait for actions triggered by the click
-                return True  # If a search drop is found and clicked, return True
-        except pyautogui.ImageNotFoundException:
-            print(f"Error: {drop_image} not found on screen.")
-    print("No search drops found in the main region.")
-    return False  # Return False if no drops are detected
+# def check_and_click_search_drop():
+#     """Check if any search drop is visible in the defined region and click it."""
+#     print("Checking for search drops in the main region...")
+#     #time.sleep(1)
+#     for drop_image in search_drops:
+#         try:
+#             drop_location = pyautogui.locateOnScreen(drop_image, region=SEARCH_DROP_REGION, confidence=0.7)
+#             if drop_location:
+#                 print(f"Search drop found: {drop_image}. Clicking...")
+#                 pyautogui.click(pyautogui.center(drop_location))
+#                 time.sleep(1)  # Wait for actions triggered by the click
+#                 return True  # If a search drop is found and clicked, return True
+#         except pyautogui.ImageNotFoundException:
+#             print(f"Error: {drop_image} not found on screen.")
+#     print("No search drops found in the main region.")
+#    return False  # Return False if no drops are detected
+
 def clear_area_for_visibility():
     print("Clearing the area for visibility...")
     # Click to clear the area (adjust coordinates as necessary)
-    pyautogui.click(822, 475)  
+    pyautogui.click(583, 448)  
     time.sleep(0.5)  # Wait for area to be cleared
 
 def search_for_miscrit():
@@ -149,7 +150,7 @@ import pyautogui
 import time
 import concurrent.futures
 
-def detect_new_miscrit(capture_region = (728, 409, 163, 37), expected_text="New Miscrit"):
+def detect_new_miscrit(capture_region = (520, 420, 112, 26), expected_text="New Miscrit"):
     """
     Detect if a new Miscrit text appears on the screen after closing the win screen.
     """
@@ -205,8 +206,8 @@ def detect_target_miscrit(target_texts=["Dark Poltergust", "Light Snorkels", "Li
             return ""
 
     # Define regions for OCR checks
-    miscrit_region = (1213, 75, 102, 29)  # Region for target Miscrit detection
-    capture_region = (723, 433, 137, 34)
+    miscrit_region = (826, 179, 899 - 826, 198 - 179)  # Region for target Miscrit detection
+    capture_region = (617, 545, 72, 23)
 
     # Detect target Miscrit
     with concurrent.futures.ThreadPoolExecutor() as executor:
@@ -221,22 +222,24 @@ def detect_target_miscrit(target_texts=["Dark Poltergust", "Light Snorkels", "Li
             # Attack the target Miscrit using the provided coordinates
             # pyautogui.click(ATTACK_BUTTON_COORDS)  # Click Attack button
             #time.sleep(2)  # Pause before next action
-            #pyautogui.click(850, 954)  # Click the additional button
-            print(f"Making a move...")
-            time.sleep(4)  # Pause to ensure the action is registered
-            pyautogui.click(1425, 951)  # Click the additional button
+            #pyautogui.click(563, 806)  # Click the additional button
             print(f"Target Miscrit '{target_text}' detected! Attack 2/3.")
+            time.sleep(4)  # Pause to ensure the action is registered
+            pyautogui.click(563, 806)
+            # Click the additional button
+            print(f"Making a move...")
             time.sleep(3)  # Pause to ensure the action is registered
-            pyautogui.click(850, 954)  # Click the additional button
+            pyautogui.click(973, 806)
+            # Click the additional button
             print(f"Target Miscrit '{target_text}' detected! Attack 3/3.")
             time.sleep(3)  # Pause to ensure the action is registered
-            pyautogui.click(866, 941)  # Click the additional button
+            pyautogui.click(580, 803)  # Click the additional button
             print(f"Pressing Capture...")
             time.sleep(6)  # Pause to ensure the action is registered
-            pyautogui.click(960, 159)  # Click the additional button
+            pyautogui.click(639, 240)  # Click the additional button
             print(f"Pressing Skip...")
             time.sleep(5)
-            pyautogui.click(878, 605)  # Click capture button 2
+            pyautogui.click(629, 553)  # Click capture button 2
             time.sleep(2)
 
             # Check for capture text
@@ -246,9 +249,9 @@ def detect_target_miscrit(target_texts=["Dark Poltergust", "Light Snorkels", "Li
             if capture_text in capture_text_detected:
                 print("Catch text found! Performing catch actions.")
                 time.sleep(2)
-                pyautogui.click(912, 598)  # Click capture button 1
+                pyautogui.click(650, 556)  # Click capture button 1
                 time.sleep(2)
-                pyautogui.click(878, 605)  # Click capture button 2
+                pyautogui.click(878, 605)  # Click capture button 2 #TO CHANGE COORDS
                 time.sleep(2)
             else:
                 print("Catch text not found.")
@@ -334,20 +337,20 @@ def fight_miscrit():
             if detect_new_miscrit():
                 #new_miscrit_detected = True
                 print("New Miscrit detected after win screen. Keeping...")
-                pyautogui.click(1005, 615)  # Click the additional button
+                pyautogui.click(724, 567)  # Click the additional button
                 time.sleep(1)
-                pyautogui.click(448, 75)  # Click the additional button
+                pyautogui.click(329, 182)  # Click the additional button
                 time.sleep(1)
 
                 # Perform drag and drop after the time.sleep
-                start_coords = (1026, 455)  # Replace with the actual starting coordinates
-                end_coords = (972, 645)    # Replace with the actual ending coordinates
+                start_coords = (707, 445)  # Replace with the actual starting coordinates
+                end_coords = (701, 583)    # Replace with the actual ending coordinates
                 pyautogui.moveTo(start_coords[0], start_coords[1])  # Move to the starting position
                 pyautogui.mouseDown()  # Hold down the mouse button
                 pyautogui.moveTo(end_coords[0], end_coords[1], duration=0.5)  # Drag to the ending position
                 pyautogui.mouseUp()  # Release the mouse button
                 print(f"Dragged from {start_coords} to {end_coords}.")
-                pyautogui.click(1272, 884)  # Click the additional button
+                pyautogui.click(912, 758)  # Click the additional button
 
             # If "Ready to Train" is detected, proceed to training
             if ready_to_train_detected:
@@ -364,7 +367,7 @@ def fight_miscrit():
 def detect_S():
     """Detects 'S' Miscrit within the selected screen region."""
     try:
-        s_image_location = pyautogui.locateOnScreen('S.png', region=SEARCH_REGION, confidence=0.7)
+        s_image_location = pyautogui.locateOnScreen('simg.png', region=SEARCH_REGION, confidence=0.7)
         if s_image_location:
             print("S Miscrit found!")
             return True
@@ -378,7 +381,7 @@ def detect_S():
 def detect_S_plus():
     """Detects 'S+' Miscrit within the selected screen region."""
     try:
-        s_plus_image_location = pyautogui.locateOnScreen('S+.png', region=SEARCH_REGION, confidence=0.7)
+        s_plus_image_location = pyautogui.locateOnScreen('s+img.png', region=SEARCH_REGION, confidence=0.7)
         if s_plus_image_location:
             return True
         else:
@@ -403,7 +406,7 @@ def handle_training():
     # Check for S or S+ Miscrit before proceeding further
     if detect_S() or detect_S_plus():
         print("S or S+ Miscrit found!")
-        pyautogui.click((780, 901))  # Plat train button
+        pyautogui.click((561, 773))  # Plat train button
         print("Plat train clicked for 'S' or 'S+' Miscrit.")
         time.sleep(1)
         #return  # Exit the function after Plat Train to avoid clicking Continue
@@ -427,11 +430,11 @@ def handle_training():
         if detect_evolved_text():
             evolved_detected = True
             print("Evolved text detected on attempt", attempt + 1)
-            pyautogui.click((898, 824))  # Click evolved Miscrit
+            pyautogui.click((643, 717))  # Click evolved Miscrit
             time.sleep(1)
-            pyautogui.click((898, 764))  # Confirm evolution
+            pyautogui.click((635, 677))  # Confirm evolution
             time.sleep(1)
-            pyautogui.click((1022, 454))  # Blank space
+            pyautogui.click((682, 507))  # Blank space
             time.sleep(1)
             print("Closing the training window...")
             pyautogui.click(CLOSE_TRAIN_BUTTON_COORDS)
@@ -487,12 +490,13 @@ def main_loop():
             start_time = time.time()  # Start time for the search
 
             while time.time() - start_time < search_timeout:  # Limit search time
-                if check_and_click_search_drop():
-                    print("Search drop clicked. Continuing...")
-                    continue  # Proceed to the next step after handling a drop
+                # if check_and_click_search_drop():
+                #     print("Search drop clicked. Continuing...")
+                #     continue  # Proceed to the next step after handling a drop
 
                 #highlight_search_region()
-                clear_area_for_visibility()
+                if clear_area_for_visibility():
+                    continue
 
                 if search_for_miscrit():
                     print("Miscrit found! Entering battle...")
