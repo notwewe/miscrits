@@ -15,7 +15,7 @@ pygame.init()
 
 # Image paths for detecting the battle screen, Close button, and multiple Search areas
 CLOSE_BUTTON_IMAGE = 'close.png'
-SEARCH_AREAS = ['raldio.png']
+SEARCH_AREAS = ['lightIG.png']
 WIN_SCREEN_IMAGE = 'win (2).png'
 READY_TO_TRAIN_IMAGE = 'readytotrain.png'
 #TARGET_MISCRIT_IMAGE = 'lightzap2.png'
@@ -32,8 +32,11 @@ TRAIN_BUTTON_COORDS = (563, 78)
 MISCRIT_TO_TRAIN_COORDS = (606, 307)
 TRAIN_NOW_BUTTON_COORDS = (938, 194)
 CONTINUE_BUTTON_COORDS = (1074, 900)
-CONTINUE_BUTTON_COORDS2 = (895, 663)
+CONTINUE_BUTTON_COORDS2 = (895, 663)    
+MISCRIT_REGION = (1213, 75, 102, 29)  # Region for target Miscrit detection
+
 CLOSE_TRAIN_BUTTON_COORDS = (1332, 158)
+
 
 SEARCH_REGION = (491, 316, 514 - 491, 338 - 316)
 
@@ -74,7 +77,7 @@ def search_for_miscrit():
                 print(f"Search area found: {search_area}. Clicking to search for Miscrit...")
                 search_area_center = pyautogui.center(search_area_location)
                 pyautogui.click(search_area_center)
-                time.sleep(4)  # Wait to ensure the search starts
+                time.sleep(5)  # Watch to ensure the search starts
 
                 # Now check if the Miscrit is found
                 if is_miscrit_found():
@@ -144,11 +147,6 @@ def show_alert():
     button.pack(pady=10)
     alert.mainloop()
 
-import pytesseract
-import pyautogui
-import time
-import concurrent.futures
-
 def detect_new_miscrit(capture_region = (728, 409, 163, 37), expected_text="New Miscrit"):
     """
     Detect if a new Miscrit text appears on the screen after closing the win screen.
@@ -187,6 +185,8 @@ def preprocess_image_for_ocr(image):
     """Preprocess the image for OCR to enhance text detection."""
     grayscale_image = image.convert('L')  # Convert image to grayscale
     enhanced_image = ImageOps.autocontrast(grayscale_image)  # Enhance contrast
+    enhanced_image.save("preprocessed_target.png")  # Save the preprocessed image for debugging
+
     return enhanced_image
 
 def detect_target_miscrit(target_texts=["Dark Poltergust", "Light Snorkels", "Light Ignios", "Peepsie", "Raldio", "Dark Slithero"], capture_text="Catch"):
@@ -199,13 +199,15 @@ def detect_target_miscrit(target_texts=["Dark Poltergust", "Light Snorkels", "Li
             screenshot.save("target.png")  # Save screenshot for debugging
             screenshot = preprocess_image_for_ocr(screenshot)  # Preprocess image
             text_in_region = pytesseract.image_to_string(screenshot)  # OCR text detection
+            print(f"OCR detected text: {text_in_region.strip()}")  # Log detected text
+
             return text_in_region.strip()
         except Exception as e:
             print(f"Error in OCR: {e}")
             return ""
 
     # Define regions for OCR checks
-    miscrit_region = (1213, 75, 102, 29)  # Region for target Miscrit detection
+    miscrit_region = (1219, 72, 103, 29)
     capture_region = (723, 433, 137, 34)
 
     # Detect target Miscrit
@@ -216,8 +218,8 @@ def detect_target_miscrit(target_texts=["Dark Poltergust", "Light Snorkels", "Li
     # Check if any of the target texts are in the detected text
     for target_text in target_texts:
         if target_text in text_in_region:
-            show_alert()
             print(f"Target Miscrit '{target_text}' detected! Attack 1/2.")
+            show_alert()
             # Attack the target Miscrit using the provided coordinates
             # pyautogui.click(ATTACK_BUTTON_COORDS)  # Click Attack button
             #time.sleep(2)  # Pause before next action
@@ -460,7 +462,7 @@ def toggle_running_state():
 def highlight_search_region():
 
     #search_region = (1219, 71, 109, 26)  # Width = 1328 - 1219, Height = 97 - 71
-    search_region = SEARCH_DROP_REGION
+    search_region = MISCRIT_REGION
     """Highlight the search region in red to indicate the search area."""
     screenshot = pyautogui.screenshot()  # This is already a PIL Image object
     draw = ImageDraw.Draw(screenshot)
@@ -493,7 +495,6 @@ def main_loop():
 
                 #highlight_search_region()
                 clear_area_for_visibility()
-
                 if search_for_miscrit():
                     print("Miscrit found! Entering battle...")
                     fight_miscrit()  # Proceed with battle if found
