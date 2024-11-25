@@ -386,7 +386,7 @@ def detect_S():
 def detect_S_plus():
     """Detects 'S+' Miscrit within the selected screen region."""
     try:
-        s_plus_image_location = pyautogui.locateOnScreen('S.png', region=SEARCH_REGION, confidence=0.7)
+        s_plus_image_location = pyautogui.locateOnScreen('S+.png', region=SEARCH_REGION, confidence=0.7)
         if s_plus_image_location:
             return True
         else:
