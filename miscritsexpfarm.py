@@ -15,7 +15,7 @@ pygame.init()
 
 # Image paths for detecting the battle screen, Close button, and multiple Search areas
 CLOSE_BUTTON_IMAGE = 'close.png'
-SEARCH_AREAS = ['lightIG.png']
+SEARCH_AREAS = ['lightAB.png', 'pips.png', 'lightB.png', 'lightIG.png', 'freedom1.png', 'foilw.png', 'BFL.png']
 WIN_SCREEN_IMAGE = 'win (2).png'
 READY_TO_TRAIN_IMAGE = 'readytotrain.png'
 #TARGET_MISCRIT_IMAGE = 'lightzap2.png'
@@ -33,16 +33,16 @@ MISCRIT_TO_TRAIN_COORDS = (606, 307)
 TRAIN_NOW_BUTTON_COORDS = (938, 194)
 CONTINUE_BUTTON_COORDS = (1074, 900)
 CONTINUE_BUTTON_COORDS2 = (895, 663)    
-MISCRIT_REGION = (1213, 75, 102, 29)  # Region for target Miscrit detection
+MISCRIT_REGION = (1219, 72, 103, 29)
 
 CLOSE_TRAIN_BUTTON_COORDS = (1332, 158)
 
 
-SEARCH_REGION = (491, 316, 514 - 491, 338 - 316)
+SEARCH_REGION = (482, 317, 24, 24)
 
 running = False
 
-SEARCH_DROP_REGION = (841, 435, 273, 121) 
+SEARCH_DROP_REGION = (867, 393, 201, 172) 
 
 def check_and_click_search_drop():
     """Check if any search drop is visible in the defined region and click it."""
@@ -50,7 +50,7 @@ def check_and_click_search_drop():
     #time.sleep(1)
     for drop_image in search_drops:
         try:
-            drop_location = pyautogui.locateOnScreen(drop_image, region=SEARCH_DROP_REGION, confidence=0.7)
+            drop_location = pyautogui.locateOnScreen(drop_image, region=SEARCH_DROP_REGION, confidence=0.8)
             if drop_location:
                 print(f"Search drop found: {drop_image}. Clicking...")
                 pyautogui.click(pyautogui.center(drop_location))
@@ -181,15 +181,24 @@ def detect_new_miscrit(capture_region = (728, 409, 163, 37), expected_text="New 
 from PIL import ImageOps
 import concurrent.futures
 
+MISCRIT_REGION = (1213, 77, 102, 30)  # Define the region for OCR (Miscrit text area)
+CAPTURE_REGION = (723, 433, 137, 34)  # Define the region for OCR (Capture text area)
+
 def preprocess_image_for_ocr(image):
     """Preprocess the image for OCR to enhance text detection."""
-    grayscale_image = image.convert('L')  # Convert image to grayscale
-    enhanced_image = ImageOps.autocontrast(grayscale_image)  # Enhance contrast
-    enhanced_image.save("preprocessed_target.png")  # Save the preprocessed image for debugging
+    # Convert image to grayscale
+    grayscale_image = image.convert('L')
 
-    return enhanced_image
+    # Apply moderate contrast enhancement without binary threshold
+    #enhanced_image = ImageOps.autocontrast(grayscale_image)  # Automatically adjust contrast
 
-def detect_target_miscrit(target_texts=["Dark Poltergust", "Light Snorkels", "Light Ignios", "Peepsie", "Raldio", "Dark Slithero"], capture_text="Catch"):
+    #enhanced_image.save("preprocessed_target.png")  # Save the preprocessed image for debugging
+
+    #return enhanced_image
+    return grayscale_image
+
+
+def detect_target_miscrit(target_texts=["Foil Vhisp", "Freedom", "Dark Poltergust", "Light Snorkels", "Light Ignios", "Peepsie", "Raldio", "Dark Slithero", "Light Bludger", "Blighted Flowerpiller", "Light Frostmite"], capture_text="Catch"):
     """Detect if any of the target Miscrit texts appear on screen and attack it once."""
     print("Checking for target Miscrit texts...")
 
@@ -198,7 +207,8 @@ def detect_target_miscrit(target_texts=["Dark Poltergust", "Light Snorkels", "Li
             screenshot = pyautogui.screenshot(region=region)  # Capture region
             screenshot.save("target.png")  # Save screenshot for debugging
             screenshot = preprocess_image_for_ocr(screenshot)  # Preprocess image
-            text_in_region = pytesseract.image_to_string(screenshot)  # OCR text detection
+            config = '--psm 6'  # Use appropriate page segmentation mode
+            text_in_region = pytesseract.image_to_string(screenshot, config=config)  # OCR text detection
             print(f"OCR detected text: {text_in_region.strip()}")  # Log detected text
 
             return text_in_region.strip()
@@ -206,13 +216,9 @@ def detect_target_miscrit(target_texts=["Dark Poltergust", "Light Snorkels", "Li
             print(f"Error in OCR: {e}")
             return ""
 
-    # Define regions for OCR checks
-    miscrit_region = (1219, 72, 103, 29)
-    capture_region = (723, 433, 137, 34)
-
     # Detect target Miscrit
     with concurrent.futures.ThreadPoolExecutor() as executor:
-        future = executor.submit(ocr_task, miscrit_region)  # Run OCR for Miscrit region
+        future = executor.submit(ocr_task, MISCRIT_REGION)  # Run OCR for Miscrit region
         text_in_region = future.result()  # Get OCR result
 
     # Check if any of the target texts are in the detected text
@@ -244,7 +250,7 @@ def detect_target_miscrit(target_texts=["Dark Poltergust", "Light Snorkels", "Li
             # Check for capture text
             print("Checking for catch text...")
             time.sleep(2)
-            capture_text_detected = ocr_task(capture_region)
+            capture_text_detected = ocr_task(CAPTURE_REGION)
             if capture_text in capture_text_detected:
                 print("Catch text found! Performing catch actions.")
                 time.sleep(2)
@@ -275,7 +281,7 @@ def detect_evolved_text():
         print("Error: 'Evolved' text not found.")
         return False
 
-MAX_BATTLE_TIME = 180  # Maximum battle time in seconds (3 minutes)
+MAX_BATTLE_TIME = 500  # Maximum battle time in seconds (3 minutes)
 
 def is_miscrit_found():
     """Check if the Miscrit image is on the screen."""
@@ -380,7 +386,7 @@ def detect_S():
 def detect_S_plus():
     """Detects 'S+' Miscrit within the selected screen region."""
     try:
-        s_plus_image_location = pyautogui.locateOnScreen('S+.png', region=SEARCH_REGION, confidence=0.7)
+        s_plus_image_location = pyautogui.locateOnScreen('S.png', region=SEARCH_REGION, confidence=0.7)
         if s_plus_image_location:
             return True
         else:
@@ -399,7 +405,7 @@ def handle_training():
     pyautogui.click(MISCRIT_TO_TRAIN_COORDS)
     time.sleep(1)
     pyautogui.click(TRAIN_NOW_BUTTON_COORDS)
-    time.sleep(1)
+    time.sleep(2)
 
 
     # Check for S or S+ Miscrit before proceeding further
@@ -417,7 +423,7 @@ def handle_training():
     time.sleep(1)
     print("Closing the training window...")
     pyautogui.click(CLOSE_TRAIN_BUTTON_COORDS)
-    #time.sleep(1)
+    time.sleep(1)
 
     # Wait for animation to complete before checking for evolved text
     print("Waiting for evolution animation to complete...")
@@ -480,7 +486,7 @@ def highlight_search_region():
 def main_loop():
     """Main loop that runs while the script is in the running state."""
     global running
-    search_timeout = 1000  # Max time (seconds) to search for Miscrits before retrying
+    search_timeout = 100000  # Max time (seconds) to search for Miscrits before retrying
     while True:
         if not running:
             continue
@@ -496,7 +502,6 @@ def main_loop():
                 #highlight_search_region()
                 clear_area_for_visibility()
                 if search_for_miscrit():
-                    print("Miscrit found! Entering battle...")
                     fight_miscrit()  # Proceed with battle if found
                     print("Fighting Miscrit...")
                     break
