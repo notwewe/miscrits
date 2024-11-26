@@ -15,7 +15,7 @@ pygame.init()
 
 # Image paths for detecting the battle screen, Close button, and multiple Search areas
 CLOSE_BUTTON_IMAGE = 'close.png'
-SEARCH_AREAS = ['lightAB.png', 'pips.png', 'lightB.png', 'lightIG.png', 'freedom1.png', 'foilw.png', 'BFL.png']
+SEARCH_AREAS = ['lightAB.png', 'pips.png', 'lightB.png', 'lightIG.png', 'freedom1.png', 'foilw.png', 'BFL.png', 'bloom.png']
 WIN_SCREEN_IMAGE = 'win (2).png'
 READY_TO_TRAIN_IMAGE = 'readytotrain.png'
 #TARGET_MISCRIT_IMAGE = 'lightzap2.png'
@@ -38,7 +38,7 @@ MISCRIT_REGION = (1219, 72, 103, 29)
 CLOSE_TRAIN_BUTTON_COORDS = (1332, 158)
 
 
-SEARCH_REGION = (482, 317, 24, 24)
+SEARCH_REGION = (492, 317, 24, 24)
 
 running = False
 
@@ -197,8 +197,8 @@ def preprocess_image_for_ocr(image):
     #return enhanced_image
     return grayscale_image
 
-
-def detect_target_miscrit(target_texts=["Foil Vhisp", "Freedom", "Dark Poltergust", "Light Snorkels", "Light Ignios", "Peepsie", "Raldio", "Dark Slithero", "Light Bludger", "Blighted Flowerpiller", "Light Frostmite"], capture_text="Catch"):
+def detect_target_miscrit(target_texts=["Foil Vhisp", "Freedom", "Dark Poltergust", "Light Snorkels", "Light Ignios", "Peepsie", "Raldio", "Dark Slithero", "Light Bludger", "Blighted Flowerpiller", "Light Frostmite"
+                                        , "Bloomple"], capture_text="Catch"):
     """Detect if any of the target Miscrit texts appear on screen and attack it once."""
     print("Checking for target Miscrit texts...")
 
@@ -372,7 +372,7 @@ def fight_miscrit():
 def detect_S():
     """Detects 'S' Miscrit within the selected screen region."""
     try:
-        s_image_location = pyautogui.locateOnScreen('S.png', region=SEARCH_REGION, confidence=0.7)
+        s_image_location = pyautogui.locateOnScreen('S.png', region=SEARCH_REGION, confidence=0.8)
         if s_image_location:
             print("S Miscrit found!")
             return True
@@ -386,7 +386,7 @@ def detect_S():
 def detect_S_plus():
     """Detects 'S+' Miscrit within the selected screen region."""
     try:
-        s_plus_image_location = pyautogui.locateOnScreen('S+.png', region=SEARCH_REGION, confidence=0.7)
+        s_plus_image_location = pyautogui.locateOnScreen('S+new.png', region=SEARCH_REGION, confidence=0.8)
         if s_plus_image_location:
             return True
         else:
@@ -468,7 +468,7 @@ def toggle_running_state():
 def highlight_search_region():
 
     #search_region = (1219, 71, 109, 26)  # Width = 1328 - 1219, Height = 97 - 71
-    search_region = MISCRIT_REGION
+    search_region = SEARCH_REGION
     """Highlight the search region in red to indicate the search area."""
     screenshot = pyautogui.screenshot()  # This is already a PIL Image object
     draw = ImageDraw.Draw(screenshot)
