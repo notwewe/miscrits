@@ -38,7 +38,7 @@ MISCRIT_REGION = (1219, 72, 103, 29)
 CLOSE_TRAIN_BUTTON_COORDS = (1332, 158)
 
 
-SEARCH_REGION = (492, 317, 24, 24)
+SEARCH_REGION = (484, 317, 27, 27)
 
 running = False
 
@@ -63,7 +63,7 @@ def check_and_click_search_drop():
 def clear_area_for_visibility():
     print("Clearing the area for visibility...")
     # Click to clear the area (adjust coordinates as necessary)
-    pyautogui.click(822, 475)  
+    pyautogui.click(1077, 525)  
     time.sleep(0.5)  # Wait for area to be cleared
 
 def search_for_miscrit():
@@ -72,7 +72,7 @@ def search_for_miscrit():
     for search_area in SEARCH_AREAS:
         print(f"Attempting to locate search area: {search_area}")
         try:
-            search_area_location = pyautogui.locateOnScreen(search_area, confidence=0.8)
+            search_area_location = pyautogui.locateOnScreen(search_area, confidence=0.7)
             if search_area_location:
                 print(f"Search area found: {search_area}. Clicking to search for Miscrit...")
                 search_area_center = pyautogui.center(search_area_location)
@@ -372,7 +372,7 @@ def fight_miscrit():
 def detect_S():
     """Detects 'S' Miscrit within the selected screen region."""
     try:
-        s_image_location = pyautogui.locateOnScreen('S.png', region=SEARCH_REGION, confidence=0.8)
+        s_image_location = pyautogui.locateOnScreen('S.png', region=SEARCH_REGION, confidence=0.7)
         if s_image_location:
             print("S Miscrit found!")
             return True
@@ -386,7 +386,7 @@ def detect_S():
 def detect_S_plus():
     """Detects 'S+' Miscrit within the selected screen region."""
     try:
-        s_plus_image_location = pyautogui.locateOnScreen('S+new.png', region=SEARCH_REGION, confidence=0.8)
+        s_plus_image_location = pyautogui.locateOnScreen('S+.png', region=SEARCH_REGION, confidence=0.7)
         if s_plus_image_location:
             return True
         else:
